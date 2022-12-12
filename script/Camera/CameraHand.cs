@@ -4,8 +4,7 @@ using UnityEngine;
 
 public class CameraHand : MonoBehaviour
 {
-    [SerializeField]
-    public GameObject target;
+    [SerializeField]public GameObject target;
     private float camSpeed = 0;
     [SerializeField]
     private float spdDownSpd = 0.06f;

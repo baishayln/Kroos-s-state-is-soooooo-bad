@@ -4,7 +4,7 @@ using UnityEngine;
 
 public enum StartDeBuff
 {
-    AttackDown = 0 , IntervalDown = 1 , RangeDown = 2 , ScatterDown = 3 , NoDebuff = 4
+    AttackDown = 0 , IntervalDown = 1 , RangeDown = 2 , ScatterDown = 3 , NoDebuff = 4 , CantStopShoot = 5 , DoubleGun = 6 , kaminohikari = 7 , tnnd = 8
 }
 public class PlayerShoot : MonoBehaviour
 {
@@ -43,11 +43,16 @@ public class PlayerShoot : MonoBehaviour
     private GameObject fightUI;
     [SerializeField]public GameObject Kaminobazu;               //异客支援所使用的物体
     [SerializeField]public GameObject realMedicalSupplies;      //嘉维尔支援所使用的物体
+    private bool autoShoot = true;
+    private bool canShoot = true;
+    private bool cantStopShoot = false;
+    private bool doubleShoot = false;
+    [SerializeField]public Sprite skill1Speite;
+    [SerializeField]public Sprite skill2Speite;
+    [SerializeField]public Sprite skill3Speite;
+    
 
-    
-    
-    
-    
+
     // private UI
     //      把技能读条显示在游戏界面上
     //      背景用什么颜色？还是用图片？
@@ -81,10 +86,41 @@ public class PlayerShoot : MonoBehaviour
             // if(fightUI.GetComponent<FightUIController>().GetSkillCold() <= 0 && now1stSkill != null)
                 ReleaseSkills();
         }
-        if(Input.GetKeyDown(KeyCode.Mouse0) && shootTimer <= 0)
+        if(cantStopShoot)
         {
-            Shoot();
-            shootTimer = shootColdTime;
+            if(canShoot && shootTimer <= 0)
+            {
+                Shoot();
+                if (doubleShoot)
+                {
+                    Shoot();
+                }
+                shootTimer = shootColdTime;
+            } 
+        }
+        else if(Input.GetKey(KeyCode.Mouse0) && shootTimer <= 0 && autoShoot)
+        {
+            if(canShoot)
+            {
+                Shoot();
+                if (doubleShoot)
+                {
+                    Shoot();
+                }
+                shootTimer = shootColdTime;
+            } 
+        }
+        else if(Input.GetKeyDown(KeyCode.Mouse0) && shootTimer <= 0)
+        {
+            if(canShoot)
+            {
+                Shoot();
+                if (doubleShoot)
+                {
+                    Shoot();
+                }
+                shootTimer = shootColdTime;
+            }
         }
         shootTimer -= Time.deltaTime;
         GetMousePoint();
@@ -104,6 +140,9 @@ public class PlayerShoot : MonoBehaviour
     private void AttackChange(float changeNum)
     {
         attack += changeNum;
+        
+        if(attack > 70)
+            attack = 70;
     }
     private void NumOfAttackChange(float changeNum)
     {
@@ -112,37 +151,25 @@ public class PlayerShoot : MonoBehaviour
     private void ShootColdTimeChange(float changeNum)
     {
         shootColdTime -= changeNum;
+        if(shootColdTime < 0.05f)
+            shootColdTime = 0.05f;
     }
     public void GetAttackEnhancement()
     {
         if(attack < 70)
-            AttackChange(10);
+            AttackChange(3);
         else
         {
-            if(health < 40)
-            {
-                health += 10;
-            }
-            else
-            {
-                health = 50;
-            }
+            transform.GetComponent<PlayerMove>().RestoreHP(10);
         }
     }
     public void GetIntervalEnhancement()
     {
-        if(shootColdTime < 0.15f)
-            ShootColdTimeChange(0.05f);
+        if(shootColdTime > 0.05f)
+            ShootColdTimeChange(0.03f);
         else
         {
-            if(health < 40)
-            {
-                health += 10;
-            }
-            else
-            {
-                health = 50;
-            }
+            transform.GetComponent<PlayerMove>().RestoreHP(10);
         }
     }
     public void GetRangeEnhancementt()
@@ -151,14 +178,7 @@ public class PlayerShoot : MonoBehaviour
             originSpeedDistance += originSpeedDistanceChange;
         else
         {
-            if(health < 40)
-            {
-                health += 10;
-            }
-            else
-            {
-                health = 50;
-            }
+            transform.GetComponent<PlayerMove>().RestoreHP(10);
         }
     }
     public void Getskill1()
@@ -173,19 +193,70 @@ public class PlayerShoot : MonoBehaviour
     {
         LoadSkill(3);
     }
+    private void AllowAutoShoot()
+    {
+        autoShoot = true;
+    }
+    public void CanShoot()
+    {
+        canShoot = true;
+    }
+    public void CantShoot()
+    {
+        canShoot = false;
+    }
     private void LoadSkill(int skill)
     {
         if(skill == 1)
         {
-            now1stSkill = SkillList[PlayerEnhancementType.skill1];
+            if (SkillList[PlayerEnhancementType.skill1] == now1stSkill || SkillList[PlayerEnhancementType.skill1] == now2ndSkill)
+            {
+                return;
+            }
+            if(now1stSkill != null)
+            {
+                now2ndSkill = SkillList[PlayerEnhancementType.skill1];
+                fightUI.GetComponent<FightUIController>().SetSkillImage(1 , skill1Speite);
+            }
+            else
+            {
+                now1stSkill = SkillList[PlayerEnhancementType.skill1];
+                fightUI.GetComponent<FightUIController>().SetSkillImage(0 , skill1Speite);
+            }
         }
         if(skill == 2)
         {
-            now1stSkill = SkillList[PlayerEnhancementType.skill2];
+            if (SkillList[PlayerEnhancementType.skill2] == now1stSkill || SkillList[PlayerEnhancementType.skill2] == now2ndSkill)
+            {
+                return;
+            }
+            if(now1stSkill != null)
+            {
+                now2ndSkill = SkillList[PlayerEnhancementType.skill2];
+                fightUI.GetComponent<FightUIController>().SetSkillImage(1 , skill2Speite);
+            }
+            else
+            {
+                now1stSkill = SkillList[PlayerEnhancementType.skill2];
+                fightUI.GetComponent<FightUIController>().SetSkillImage(0 , skill2Speite);
+            }
         }
         if(skill == 3)
         {
-            now1stSkill = SkillList[PlayerEnhancementType.skill3];
+            if (SkillList[PlayerEnhancementType.skill3] == now1stSkill || SkillList[PlayerEnhancementType.skill3] == now2ndSkill)
+            {
+                return;
+            }
+            if(now1stSkill != null)
+            {
+                now2ndSkill = SkillList[PlayerEnhancementType.skill3];
+                fightUI.GetComponent<FightUIController>().SetSkillImage(1 , skill3Speite);
+            }
+            else
+            {
+                now1stSkill = SkillList[PlayerEnhancementType.skill3];
+                fightUI.GetComponent<FightUIController>().SetSkillImage(0 , skill3Speite);
+            }
         }
     }
     public void ChangeSkill()
@@ -199,22 +270,49 @@ public class PlayerShoot : MonoBehaviour
         }
         //播放声音，从游戏里录？
     }
-    public void GetScatterEnhancement()
+    public Sprite GetSkillSprite(int skill)
     {
-        if(shootDeviation >= 15)
+        if (skill == 0)
         {
-            shootDeviation -= 15;
+            return FindSkillSprite(now1stSkill);
         }
         else
         {
-            if(health < 40)
+            return FindSkillSprite(now2ndSkill);
+        }
+    }
+    private Sprite FindSkillSprite(PlayerSkill skill)
+    {
+        if (skill == SkillList[PlayerEnhancementType.skill1])
+        {
+            return skill1Speite;
+        }
+        else if (skill == SkillList[PlayerEnhancementType.skill2])
+        {
+            return skill2Speite;
+        }
+        else if (skill == SkillList[PlayerEnhancementType.skill3])
+        {
+            return skill3Speite;
+        }
+        else
+        {
+            return null;
+        }
+    }
+    public void GetScatterEnhancement()
+    {
+        if(shootDeviation > 5)
+        {
+            shootDeviation -= 4;
+            if(shootDeviation <= 5)
             {
-                health += 10;
+                shootDeviation = 5;
             }
-            else
-            {
-                health = 50;
-            }
+        }
+        else
+        {
+            transform.GetComponent<PlayerMove>().RestoreHP(10);
         }
     }
     public void GetDebuff(StartDeBuff type)
@@ -222,16 +320,30 @@ public class PlayerShoot : MonoBehaviour
         switch (type)
         {
             case StartDeBuff.AttackDown:
-                attack -= 5f;
+                attack -= 2;
                 break;
             case StartDeBuff.IntervalDown:
-                shootColdTime += 0.05f;
+                shootColdTime += 0.04f;
                 break;
             case StartDeBuff.ScatterDown:
-                shootDeviation += 15f;
+                shootDeviation += 4f;
                 break;
             case StartDeBuff.RangeDown:
-                originSpeedDistance = 0f;
+                originSpeedDistance -= 1;
+                break;
+            case StartDeBuff.CantStopShoot:
+                shootColdTime -= 0.04f;
+                cantStopShoot = true;
+                break;
+            case StartDeBuff.DoubleGun:
+                shootColdTime *= 2;
+                doubleShoot = true;
+                break;
+            case StartDeBuff.kaminohikari:
+                LoadSkill(2);
+                break;
+            case StartDeBuff.tnnd:
+                LoadSkill(3);
                 break;
             default:
                 break;
@@ -240,8 +352,8 @@ public class PlayerShoot : MonoBehaviour
     private void Shoot()
     {
         // GameObject bullet = GameObject.Instantiate(bulletPrefab , firePoint.transform.position , Quaternion.identity);
-        GameObject bullet = ObjectPool.Instance.GetObject(bulletPrefab);
-        bullet.transform.position = transform.position;
+        GameObject bullet = ObjectPool.Instance.GetObject(bulletPrefab , firePointPosition , Quaternion.identity);
+        // bullet.transform.position = firePointPosition;
         if(shootDeviation > 0.05f || shootDeviation < -0.05f)
         {
             bullet.transform.right = firePointDirection.normalized;

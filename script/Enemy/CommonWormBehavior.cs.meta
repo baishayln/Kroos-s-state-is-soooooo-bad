@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: e83765178d2a5bf43a5c8a4aeacc9981
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - playerGeneratePrefab: {instanceID: 0}
+  - Enhancement1: {fileID: 8048362587209333708, guid: c2886c3668142ee46aea2c409b9ba462, type: 3}
+  - Enhancement2: {fileID: 7028138903678308492, guid: 8c529c0803e9ca843bc1571200839a54, type: 3}
+  - Enhancement3: {fileID: 4208622843047809618, guid: 2a0e768a996d8144f943bcc1af070625, type: 3}
+  - Enhancement4: {fileID: 865154493480737243, guid: 69547df9d1adcb44ab24e41227498b45, type: 3}
+  - Enhancement5: {fileID: 2295657095240757312, guid: 660e013ddf836854489c0dc76691d96c, type: 3}
+  - Enhancement6: {fileID: 3465438320738468220, guid: d5313c1cab5e7434c8acc4538d828881, type: 3}
+  - Enhancement7: {fileID: 7400559642884997951, guid: 4bf6144ad2796b942a8b58456ac65240, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

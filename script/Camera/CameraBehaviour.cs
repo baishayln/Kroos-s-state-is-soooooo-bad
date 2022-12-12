@@ -45,10 +45,12 @@ public class CameraBehaviour : MonoBehaviour
         }
         shouleBePosition = transform.position;
         // Vector3 cameraZero = transform.GetComponent<Camera>().
-        float ROfcameraX = (Camera.main.ViewportToWorldPoint(Vector3.one).x - Camera.main.ViewportToWorldPoint(Vector3.zero).x) * 0.5f + 1.5f;
-        float ROfcameraY = (Camera.main.ViewportToWorldPoint(Vector3.one).y - Camera.main.ViewportToWorldPoint(Vector3.zero).y) * 0.5f + 1.5f;
+        ROfcameraX = (Camera.main.ViewportToWorldPoint(Vector3.one).x - Camera.main.ViewportToWorldPoint(Vector3.zero).x) * 0.5f + 1.5f;
+        ROfcameraY = (Camera.main.ViewportToWorldPoint(Vector3.one).y - Camera.main.ViewportToWorldPoint(Vector3.zero).y) * 0.5f + 1.5f;
         ROfenemyBorn.x = ROfcameraX;
         ROfenemyBorn.y = ROfcameraY;
+        // ROfenemyBorn.x = Screen.width * 0.5f + 1.5f;
+        // ROfenemyBorn.y = Screen.height * 0.5f + 1.5f;
     }
 
     void FixedUpdate()
@@ -120,6 +122,10 @@ public class CameraBehaviour : MonoBehaviour
         // return Vector2.left;
         //不直接返回位置，而是返回当前相机的边框距离加上1.5形成可选择的刷怪范围，由每种怪物的不同脚本计算不同的刷怪位置区域
 
+        ROfcameraX = (Camera.main.ViewportToWorldPoint(Vector3.one).x - Camera.main.ViewportToWorldPoint(Vector3.zero).x) * 0.5f + 1.5f;
+        ROfcameraY = (Camera.main.ViewportToWorldPoint(Vector3.one).y - Camera.main.ViewportToWorldPoint(Vector3.zero).y) * 0.5f + 1.5f;
+        ROfenemyBorn.x = ROfcameraX;
+        ROfenemyBorn.y = ROfcameraY;
         return ROfenemyBorn;
     }
     public Vector3 ReturnCameraPosition()

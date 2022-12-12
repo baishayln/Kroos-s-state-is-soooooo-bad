@@ -29,7 +29,16 @@ public class StartScenceController : MonoBehaviour
     [SerializeField]public GameObject mainMenu;
     [SerializeField]public GameObject stageChoise;
     [SerializeField]public GameObject setting;
+    private bool isShowSetting = false;
     private Color UIColor;
+    [SerializeField]private AudioClip uiEffect;
+    [SerializeField]private AudioClip BGM;
+    //      UI适配部分，被Unity自带功能替换
+    // [SerializeField]private float basicScreenX = 811;
+    // [SerializeField]private float basicScreenY = 456;
+    // private float nowScreenX;
+    // private float nowScreenY;
+    
 
     // Start is called before the first frame update
     void Start()
@@ -57,6 +66,16 @@ public class StartScenceController : MonoBehaviour
             stageChoise = transform.GetChild(3).gameObject;
         if(!setting)
             setting = transform.GetChild(4).gameObject;
+        
+        
+        // nowScreenX = basicScreenX;
+        // nowScreenY = basicScreenY;
+        // float ROfcameraX = (Camera.main.ViewportToScreenPoint(Vector3.one).x - Camera.main.ViewportToScreenPoint(Vector3.zero).x);
+        // float ROfcameraY = (Camera.main.ViewportToScreenPoint(Vector3.one).y - Camera.main.ViewportToScreenPoint(Vector3.zero).y);
+        // if (true)
+        // {
+            
+        // }
     }
     //按钮的bool，switch传入和一开始的nowUI
     //每个按钮可触发的函数都需要判断当前是否正在切换UI
@@ -155,13 +174,23 @@ public class StartScenceController : MonoBehaviour
     // {
         
     // }
-    public void PlayAudio()
+    public void PlayDong()
     {
-
+        if (uiEffect)
+        {
+            SoundManager.Instance.PlayEffectSound(uiEffect);
+        }
     }
     public void PlayBGM()
     {
-        
+        if (BGM)
+        {
+            SoundManager.Instance.PlayMusicSound(BGM);
+        }
+    }
+    public void PlayAudio()
+    {
+
     }
     public void TitleToStageChoise()
     {
@@ -284,7 +313,7 @@ public class StartScenceController : MonoBehaviour
             loadSlider.value = operation.progress;
             if(operation.progress < 0.9f)
             {
-                loadingText.text = operation.progress * 100 + "%";
+                loadingText.text = (operation.progress * 100).ToString("f0") + "%";
             }
             else
             {
@@ -298,8 +327,27 @@ public class StartScenceController : MonoBehaviour
             yield return null;
         }
     }
-    public void ExitGame()
+    public void ShowSetting()
     {
-        
+        if (!isShowSetting)
+        {
+            title.SetActive(false);
+            setting.SetActive(true);
+            isShowSetting = true;
+        }
+        else
+        {
+            QuitSetting();
+        }
+    }
+    public void QuitSetting()
+    {
+        setting.SetActive(false);
+        title.SetActive(true);
+        isShowSetting = false;
+    }
+    public void QuitGame()
+    {
+        Application.Quit();
     }
 }

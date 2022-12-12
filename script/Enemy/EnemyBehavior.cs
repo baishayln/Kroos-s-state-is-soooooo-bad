@@ -4,14 +4,15 @@ using UnityEngine;
 
 public class EnemyBehavior : MonoBehaviour
 {
-    [SerializeField]private float health = 10;
+    [SerializeField]public float healthUpLimit = 30;
+    [SerializeField]public float health;
     [SerializeField]public float shootInterval = 3;
-    private float timer;
-    [SerializeField]public float minInclusive = 2;
-    [SerializeField]public float maxInclusive = 5;
+    protected float shootTimer;
+    [SerializeField]public float minInclusive = 1;
+    [SerializeField]public float maxInclusive = 3;
     [SerializeField]public float speed = 3;
-    private Rigidbody2D rig;
-    private GameObject player;
+    protected Rigidbody2D rig;
+    protected GameObject player;
     public GameObject playerGeneratePrefab;
     [SerializeField]public float healthConstant;
     public float rewardProbabilty = 20;
@@ -23,17 +24,28 @@ public class EnemyBehavior : MonoBehaviour
     [SerializeField]public GameObject Enhancement5;
     [SerializeField]public GameObject Enhancement6;
     [SerializeField]public GameObject Enhancement7;
-    private GameObject fightUI;
-    private GameObject target;
-    private float hitDir;
-    private bool isDead = false;
-    private float deadTimer = 0;
+    protected GameObject fightUI;
+    protected GameObject target;
+    protected float hitDir;
+    [SerializeField]protected bool isDead = false;
+    protected float deadTimer = 0;
+    protected bool isShoot = false;
     [SerializeField]public Vector3 wRotateSpeed = new Vector3(0 , 0 , 720);
+    protected Transform cameraPoint;
+    protected Collider2D[] objs;
+    protected Transform nearestEnemy;
+    protected float nearsetEnemyDsts;
+    protected bool isFight;
+    protected bool isEscape;
+    protected float escapeTimer = 0;
+    private float hitedMove = 1.5f;
+    protected Vector2 moveSpeed = new Vector2(0 , 0);
     //      添加一个全局变量控制怪物波数
     // Start is called before the first frame update
-    void Start()
+    virtual protected void Start()
     {
-        rig = gameObject.GetComponent<Rigidbody2D>();
+        fightUI = GameObject.Find("FightUI");
+        // rig = gameObject.GetComponent<Rigidbody2D>();
     }
     void OnEnable()
     {
@@ -41,18 +53,23 @@ public class EnemyBehavior : MonoBehaviour
         setHealth();
         isDead = false;
         deadTimer = 0;
+        transform.localScale = Vector3.one;
         transform.GetComponent<BoxCollider2D>().enabled = true;
         transform.rotation = Quaternion.identity;
+        health = healthUpLimit;
+        shootTimer = shootInterval;
     }
 
     // Update is called once per frame
     void Update()
     {
-        if(!isDead)
+        IsTooLongOfCamera();
+        
+        if(!isDead && !isShoot)
         {
             Move();
         }
-        else
+        else if(isDead)
         {
             transform.Rotate(wRotateSpeed * Time.deltaTime);
             deadTimer += Time.deltaTime;
@@ -62,10 +79,25 @@ public class EnemyBehavior : MonoBehaviour
                 ObjectPool.Instance.PushObject(gameObject);
             }
         }
-        if(timer < 0)
+        if(shootTimer < 0 && !isShoot)
+        {
+            ShootStart();
+            SetTimer();
+        }
+        else if(isShoot)
         {
             Shoot();
-            SetTimer();
+        }
+        else
+        {
+            if (!isDead)
+            {
+                shootTimer -= Time.deltaTime;
+            }
+        }
+        if(isDead && transform.localScale.x > 0)
+        {
+            transform.localScale = new Vector3(transform.localScale.x - Time.deltaTime * 2 , transform.localScale.y - Time.deltaTime * 2 , transform.localScale.z - Time.deltaTime * 2);
         }
     }
     virtual protected void Move()
@@ -83,17 +115,27 @@ public class EnemyBehavior : MonoBehaviour
             rig.velocity = Vector2.zero * speed;
         }
     }
-    private void Shoot()
+    virtual protected void Shoot()
     {
 
     }
-    private void SetTimer()
+    virtual protected void ShootStart()
     {
-        timer = shootInterval + Random.Range(minInclusive , maxInclusive);
+
+    }
+    virtual protected void ShootEnd()
+    {
+
     }
 
-    private void Die()
+    virtual protected void SetTimer()
     {
+        // timer = shootInterval + Random.Range(minInclusive , maxInclusive);
+    }
+
+    protected void Die()
+    {
+        EnemyCountDown();
         //      命中时向后击退的幅度变大有可能会飞起一定高度，在一段时间后销毁（闪烁消失？）
         if(Random.Range(0 , 100) < DropProbability)
         {
@@ -125,7 +167,7 @@ public class EnemyBehavior : MonoBehaviour
             }
         }
         // Destroy(gameObject);
-        SetChildToPool();
+        // SetChildToPool();
         isDead = true;
     }
     private void GenerateRewards(GameObject Enhancement)        //掉落物体并销毁自身
@@ -138,7 +180,7 @@ public class EnemyBehavior : MonoBehaviour
         // SetChildToPool();
         // ObjectPool.Instance.PushObject(gameObject);
     }
-    private void SetChildToPool()
+    protected void SetChildToPool()
     {
         for(int i = transform.childCount ; i > 0 ; i--)
         {
@@ -148,7 +190,7 @@ public class EnemyBehavior : MonoBehaviour
             }
         }
     }
-    public bool OnHit(float damage , float Dir)         //当单位受伤死亡后，返回true
+    virtual public bool OnHit(float damage , float Dir)         //当单位受伤死亡后，返回true
     {
         if(Dir >= 0)
         {
@@ -158,16 +200,23 @@ public class EnemyBehavior : MonoBehaviour
         {
             hitDir = -1;
         }
+        
+        moveSpeed.x += hitDir * hitedMove;
+        rig.velocity = moveSpeed;
+        isFight = true;
+        isEscape = false;
             //  命中时会向后击退，角度有一定的变化
+            //  或者就是短暂后退
         health -= damage;
         if(health <= 0)
         {
             Die();
             DeadFly(hitDir);
         }
+        escapeTimer = 0;
         return isDead;
     }
-    public bool OnHit(float damage , Vector2 speed)         //当单位受伤死亡后，返回true
+    virtual public bool OnHit(float damage , Vector2 speed)         //当单位受伤死亡后，返回true
     {
         if(speed.x >= 0)
         {
@@ -177,6 +226,11 @@ public class EnemyBehavior : MonoBehaviour
         {
             hitDir = -1;
         }
+        
+        moveSpeed.x += hitDir * hitedMove;
+        rig.velocity = moveSpeed;
+        isFight = true;
+        isEscape = false;
             //  命中时会向后击退，角度有一定的变化
         health -= damage;
         if(health <= 0)
@@ -184,24 +238,97 @@ public class EnemyBehavior : MonoBehaviour
             Die();
             DeadFly(speed);
         }
+        escapeTimer = 0;
         return isDead;
     }
-    private void DeadFly(float hitDir)
+    protected void DeadFly(float hitDir)
     {
         transform.GetComponent<BoxCollider2D>().enabled = false;
+        rig = gameObject.GetComponent<Rigidbody2D>();
         rig.velocity = new Vector2(hitDir * 35 , Random.Range(3f , 28f));
     }
-    private void DeadFly(Vector2 speed)
+    protected void DeadFly(Vector2 speed)
     {
         transform.GetComponent<BoxCollider2D>().enabled = false;
         rig.velocity = speed;
     }
-    private void setHealth()
+    protected void EnemyCountDown()
+    {
+        if (!fightUI)
+        {
+            fightUI = GameObject.Find("FightUI");
+        }
+        fightUI.GetComponent<EnemyBornController>().EnemyDeath();
+        fightUI.GetComponent<FightUIController>().EnemyDeath();
+    }
+    protected void setHealth()
     {
         // health = health + 波数 * 一个波数常量;
     }
-    public void SetBornPosition(Vector3 ROfenemyBorn)
+    virtual public bool SetBornPosition(Vector3 ROfenemyBorn)
     {
         //地面敌人需要检测地面位置
+        return true;
+    }
+    virtual public void IsTooLongOfCamera()
+    {
+        //地面敌人需要检测地面位置
+    }
+    virtual public float GetHealth()
+    {
+        return health;
+    }
+    virtual protected void OnTriggerEnter2D(Collider2D other)
+    {
+        if(other.CompareTag("EnemyExistenceRange"))
+        {
+            cameraPoint = other.transform;
+        }
+    }
+    virtual protected void OnTriggerStay2D(Collider2D other)
+    {
+        
+    }
+    
+    public bool IsDead()
+    {
+        return isDead;
+    }
+    virtual public Transform GetNearestEnemy(float r)         //当单位受伤死亡后，返回true
+    {
+        objs = Physics2D.OverlapCircleAll(transform.position , r , LayerMask.GetMask("Enemy"));
+        if (objs.Length == 0)
+        {
+            return null;
+        }
+        if (objs[0].transform == transform)
+        {
+            if (objs.Length == 1)
+            {
+                return null;
+            }
+            else
+            {
+                nearsetEnemyDsts = Vector2.Distance(transform.position , objs[1].transform.position);
+                nearestEnemy = objs[1].transform;
+            }
+        }
+        else
+        {
+            nearsetEnemyDsts = Vector2.Distance(transform.position , objs[0].transform.position);
+            nearestEnemy = objs[0].transform;
+        }
+        for(int i = 1 ; i < objs.Length ; i ++)
+        {
+            if (Vector2.Distance(transform.position , objs[i].transform.position) < nearsetEnemyDsts)
+            {
+                if (objs[i].transform != transform && objs[i].GetComponent<EnemyBehavior>().GetHealth() > 0)
+                {
+                    nearsetEnemyDsts = Vector2.Distance(transform.position , objs[i].transform.position);
+                    nearestEnemy = objs[i].transform;
+                }
+            }
+        }
+        return nearestEnemy;
     }
 }

@@ -14,7 +14,7 @@ public class GavialsSupport : MonoBehaviour
     private GameObject player;
     private Vector3 goBackDir;
     [SerializeField]public float destroyDsts = 1;
-    [SerializeField]public float restoreHP = 1;
+    [SerializeField]public float restoreHP = 5;
     private bool isHitingGround;
     private SpriteRenderer sprtRenderer;
     private Color startColor;
@@ -61,9 +61,9 @@ public class GavialsSupport : MonoBehaviour
         }
 
         lifeTimer += Time.deltaTime;
-        if(lifeTimer > 15)
+        if(lifeTimer > 5)
         {
-            Destroy(gameObject);            //当此次被使用时在游戏中的存在时间大于15秒则被视为射击出界自行销毁或归于对象池
+            ObjectPool.Instance.PushObject(gameObject);          //当此次被使用时在游戏中的存在时间大于15秒则被视为射击出界自行销毁或归于对象池
         }
 
         if(isAttack)
@@ -161,7 +161,7 @@ public class GavialsSupport : MonoBehaviour
         {
             // treatPlayer();
             isTreatPlayer = true;
-            player.GetComponent<PlayerShoot>().RestoreHP(restoreHP);
+            player.GetComponent<PlayerMove>().RestoreHP(restoreHP);
         }
     }
 }

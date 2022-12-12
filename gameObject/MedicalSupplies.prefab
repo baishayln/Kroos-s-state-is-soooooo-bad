@@ -101,8 +101,8 @@ MonoBehaviour:
   supportSpeed: 30
   wRotateSpeed: {x: 0, y: 0, z: 1080}
   destroyDsts: 1
-  restoreHP: 1
-  damage: 150
+  restoreHP: 5
+  damage: 60
 --- !u!50 &5624959680329714394
 Rigidbody2D:
   serializedVersion: 4

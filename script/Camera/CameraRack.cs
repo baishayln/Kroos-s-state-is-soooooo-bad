@@ -5,7 +5,7 @@ using UnityEngine;
 public class CameraRack : MonoBehaviour
 {
     
-    private GameObject player;
+    [SerializeField]public GameObject player;
     private float lastPlayerX;
     private float lastPlayerY;
     private float playerX;
@@ -15,7 +15,10 @@ public class CameraRack : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        player = GameObject.Find("Player (1)");
+        if(!player)
+        {
+            player = GameObject.Find("Player");
+        }
         lastPlayerX = player.transform.position.x;
         lastPlayerY = player.transform.position.y;
     }

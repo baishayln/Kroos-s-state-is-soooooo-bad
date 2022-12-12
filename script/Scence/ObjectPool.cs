@@ -44,6 +44,31 @@ public class ObjectPool
         return obj;
     }
 
+    public GameObject GetObject(GameObject prefab , Vector3 position, Quaternion rotation)
+    {
+        GameObject obj;
+        if (!objectPool.ContainsKey(prefab.name) || objectPool[prefab.name].Count == 0)
+        {
+            obj = GameObject.Instantiate(prefab , position , rotation);
+            PushObject(obj);
+            if (pool == null)
+            {
+                pool = new GameObject("GameobjectPool");
+            }
+            GameObject childPool = GameObject.Find(prefab.name + "Pool");
+            if (!childPool)
+            {
+                childPool = new GameObject(prefab.name + "Pool");
+                childPool.transform.SetParent(pool.transform);
+            }
+            obj.transform.SetParent(childPool.transform);
+        }
+        obj = objectPool[prefab.name].Dequeue();
+        obj.SetActive(true);
+        obj.transform.position = position;
+        return obj;
+    }
+
     public void PushObject(GameObject obj)
     {
         string objName = obj.name.Replace("(Clone)" , string.Empty);

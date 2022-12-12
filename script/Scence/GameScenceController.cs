@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class GameScenceController : MonoBehaviour
 {
-    float x;
+    public float x;
     [SerializeField]public float mousePointDsts = 16;
     [SerializeField]public Texture2D mouseTexture;
     public CursorMode cursorMode = CursorMode.Auto;

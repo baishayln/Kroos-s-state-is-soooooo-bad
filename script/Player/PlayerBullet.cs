@@ -22,11 +22,15 @@ public class PlayerBullet : MonoBehaviour
     private Vector2 speedOfFar;
     [SerializeField]public float bulletAcceleration;
     [SerializeField]public float minxSpeedX;
+    [SerializeField]private Vector3 scale = new Vector3(0.6f , 0.6f , 1);
+    [SerializeField]private GameObject tarilPrefab;
+    private GameObject taril;
+    private GameObject cameraPoint;
 
     //      如果碰撞到地面会存在一段时间然后逐渐消失
     void Start()
     {
-        
+        cameraPoint = GameObject.Find("Main Camera");
     }
     void OnEnable()
     {
@@ -39,8 +43,10 @@ public class PlayerBullet : MonoBehaviour
         rig.bodyType = RigidbodyType2D.Dynamic;
         sprtRenderer.color = startColor;
         color = startColor;
-        originScale = transform.localScale;
         lifeTimer = 0;          //子弹每次被使用时的生命计时
+        speedOfFar = Vector2.zero;
+        transform.localScale = scale;
+        originScale = transform.localScale;
     }
     void FixedUpdate()
     {
@@ -73,6 +79,26 @@ public class PlayerBullet : MonoBehaviour
             // FollowTarget();
         if(!isHiting)
             RotateSelf();
+
+        if (Vector3.Distance(transform.position , cameraPoint.transform.position) > 50)
+        {
+            PushRrail();
+            ObjectPool.Instance.PushObject(gameObject);
+        }
+        // if(startxHisTr)   
+        // {
+        //     if((xHistroy > 0 && rig.velocity.x < 0) || (xHistroy < 0 && rig.velocity.x > 0))
+        //     {
+        //         Debug.Log("反向了");
+        //     }
+        //     if(rig.velocity.x > 0)
+        // {xHistroy = 1;}
+        // else
+        // {
+        //     xHistroy = -1;
+        // }
+        // startxHisTr = true;}
+        
         // XSpeedDown();   //按照时间开始减速还是按照已经飞行的距离？或者当前距离玩家的位置？（重力会影响第三种）
     }
     private void RotateSelf()
@@ -90,12 +116,20 @@ public class PlayerBullet : MonoBehaviour
             {
                 if(rig.velocity.x - minxSpeedX > 0 && speedOfFar.y <= speedOfFar.x)
                     speedOfFar.x = rig.velocity.x - bulletAcceleration;
+                else
+                {
+                    speedOfFar.x = rig.velocity.x;
+                }
                 speedOfFar.y = rig.velocity.y - bulletAcceleration;
             }
             else
             {
                 if(rig.velocity.x + minxSpeedX < 0 && speedOfFar.y <= -speedOfFar.x)
                     speedOfFar.x = rig.velocity.x + bulletAcceleration;
+                else
+                {
+                    speedOfFar.x = rig.velocity.x;
+                }
                 speedOfFar.y = rig.velocity.y - bulletAcceleration;
             }
             rig.velocity = speedOfFar;
@@ -130,21 +164,37 @@ public class PlayerBullet : MonoBehaviour
         damage = dmg;
         transform.right = dirction;
         rig.velocity = dirction * speed;
+        speedOfFar.x = rig.velocity.x;
         this.shooter = shooter;
         this.originSpeedDistance = originSpeedDistance;
         this.bulletAcceleration = bulletAcceleration;
         this.minxSpeedX = minxSpeedX;
+        
+        SetRrail();
+        // SetRrailTrue();
+        // if(rig.velocity.x > 0)
+        // {xHistroy = 1;}
+        // else
+        // {
+        //     xHistroy = -1;
+        // }
+        // startxHisTr = true;
     }
     void OnTriggerEnter2D(Collider2D other)
     {
         if(other.CompareTag("Enemy") && !isHiting)
         {
+            // SetRrailFalse();
+            PushRrail();
             Hit(other.transform);
         }
         if(other.CompareTag("Ground") && !isHiting)
         {
+            // SetRrailFalse();
+            PushRrail();
             Hit();
         }
+        // startxHisTr = false;
     }
     private void Hit(Transform hitTarget)
     {
@@ -166,7 +216,7 @@ public class PlayerBullet : MonoBehaviour
         rig.velocity = Vector2.zero;
         rig.bodyType = RigidbodyType2D.Kinematic;
         if(hitTarget.CompareTag("Enemy"))
-            hitTarget.GetComponent<EnemyBehavior>().OnHit(damage , rig.velocity.x);
+            hitTarget.GetComponent<EnemyBehavior>().OnHit(damage , transform.right.x);
     }
     private void Hit()
     {
@@ -174,6 +224,27 @@ public class PlayerBullet : MonoBehaviour
         rig.velocity = Vector2.zero;
         rig.bodyType = RigidbodyType2D.Kinematic;
     }
+    
+    public void SetRrail()
+    {
+        taril = ObjectPool.Instance.GetObject(tarilPrefab);
+        taril.transform.SetParent(transform);
+        taril.transform.position = transform.position - transform.right * 0.5f * 0.3f;
+        taril.GetComponent<PlayerBulletTrail>().trailRenderer.enabled = true;
+    }
+    public void PushRrail()
+    {
+        taril.GetComponent<PlayerBulletTrail>().StopTrail(0.2f);
+        taril = null;
+    }
+    // public void SetRrailTrue()
+    // {
+    //     transform.GetChild(0).gameObject.SetActive(true);
+    // }
+    // public void SetRrailFalse()
+    // {
+    //     transform.GetChild(0).gameObject.SetActive(false);
+    // }
     // private void FollowTarget()
     // {
     //     transform.rotation = target.transform.rotation;
