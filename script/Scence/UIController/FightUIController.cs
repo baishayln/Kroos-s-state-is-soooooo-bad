@@ -62,6 +62,17 @@ public class FightUIController : MonoBehaviour
     [SerializeField]private AudioClip BGM;
     [SerializeField]private float level;
     [SerializeField]private float scoreGet = 1;
+    [SerializeField]private float neutralBuffProbablity = 50;
+    [SerializeField]private float getSkillProbablity = 34;
+    [SerializeField]private int debuffCount = 2;
+    [SerializeField]private Text fightEndVoice;
+    [SerializeField]private Image kroosFace;
+    [SerializeField]private Sprite gameoverImage;
+    [SerializeField]private Sprite gameEndImage;
+    [SerializeField]public Slider loadSlider;
+    [SerializeField]public Text loadingText;
+    [SerializeField]public GameObject loadScreen;
+    
     // Start is called before the first frame update
     void Start()
     {
@@ -97,7 +108,7 @@ public class FightUIController : MonoBehaviour
         startDebuffDescribeDir.Add(StartDeBuff.IntervalDown , "昨晚克洛丝和博士被博士拖着在办公室玩游戏玩了个爽，今天早上还要参加行动，这让本就不足的睡眠雪上加霜！/n克洛丝，你为什么只是看着！/n攻击间隔增大！");
         startDebuffColor.Add(StartDeBuff.IntervalDown , new Color(154f/255 , 46f/255 , 81f/255 , 255f/255));//粉色
 
-        startDebuffTypeDir.Add(StartDeBuff.ScatterDown , "帕金森综合征！");
+        startDebuffTypeDir.Add(StartDeBuff.ScatterDown , "特朗哺临综合征！");
         startDebuffDescribeDir.Add(StartDeBuff.ScatterDown , "“我到河北省来，I like河北省的书呆子……好棒，好棒的……！”昨晚罗德岛有凶恶博士出没压榨员工，克洛丝今天的手有点哆哆嗦嗦的！/n什么嘛……我射的还是蛮准的吗……/n攻击散射增大！");
         startDebuffColor.Add(StartDeBuff.ScatterDown , Color.black);//黑色
 
@@ -106,7 +117,7 @@ public class FightUIController : MonoBehaviour
         startDebuffColor.Add(StartDeBuff.RangeDown , Color.yellow);//黄色
 
         startDebuffTypeDir.Add(StartDeBuff.CantStopShoot , "达瓦里希！伏特加！");
-        startDebuffDescribeDir.Add(StartDeBuff.CantStopShoot , "攻击速度上升！但无法停止射击！跟！本！停！不！下！来！是假酒！我在金酒之杯里加了假酒！");
+        startDebuffDescribeDir.Add(StartDeBuff.CantStopShoot , "攻击速度上升！但无法停止射击！是假酒！我在金酒之杯里加了假酒！");       //跟！本！停！不！下！来！
         startDebuffColor.Add(StartDeBuff.CantStopShoot , new Color(255/255 , 139f/255 , 117f/255 , 255f/255));//肉色
 
         startDebuffTypeDir.Add(StartDeBuff.DoubleGun , "双持！");
@@ -194,6 +205,7 @@ public class FightUIController : MonoBehaviour
     public void ReturnGame()
     {
         setting.SetActive(false);
+        isPause = !isPause;
         Time.timeScale = 1;
     }
 
@@ -212,10 +224,14 @@ public class FightUIController : MonoBehaviour
     }
     public void ChangeSkillImage()
     {
-        emptySkillImage = Skill1Image.sprite;
-        Skill1Image.sprite = Skill2Image.sprite;
-        Skill2Image.sprite = emptySkillImage;
-        player.GetComponent<PlayerShoot>().ChangeSkill();
+        if (player.GetComponent<PlayerShoot>().CanChangeSkillSprite())
+        {
+            emptySkillImage = Skill1Image.sprite;
+            Skill1Image.sprite = Skill2Image.sprite;
+            Skill2Image.sprite = emptySkillImage;
+            player.GetComponent<PlayerShoot>().ChangeSkill();
+        }
+        
     }
     public void SetSkillImage(int count , Sprite image)
     {
@@ -271,13 +287,17 @@ public class FightUIController : MonoBehaviour
     IEnumerator GameStart()
     {
         transform.GetComponent<EnemyBornController>().PauseBornEnemy();
-        playersDebuffs = player.GetComponent<PlayerShoot>().GiveDebuffs(2);
-        if (Random.Range(0 , 100) < 34)
+        playersDebuffs = player.GetComponent<PlayerShoot>().GiveDebuffs(debuffCount);
+        if (Random.Range(0 , 100) < neutralBuffProbablity)
         {
             StartDeBuff[] sttDebuffs = playersDebuffs;
-            playersDebuffs = new StartDeBuff[3];
-            playersDebuffs[2] = sttDebuffs[0];
-            playersDebuffs[1] = sttDebuffs[1];
+            playersDebuffs = new StartDeBuff[playersDebuffs.Length + 1];
+            for (int i = sttDebuffs.Length; i > 0; i--)
+            {
+                playersDebuffs[i] = sttDebuffs[i - 1];
+            }
+            // playersDebuffs[2] = sttDebuffs[0];
+            // playersDebuffs[1] = sttDebuffs[1];
             if(Random.Range(0 , 100) < 50)
             {
                 playersDebuffs[0] = StartDeBuff.CantStopShoot;
@@ -287,12 +307,16 @@ public class FightUIController : MonoBehaviour
                 playersDebuffs[0] = StartDeBuff.DoubleGun;
             }
         }
-        if (Random.Range(0 , 100) < 34)
+        if (Random.Range(0 , 100) < getSkillProbablity)
         {
             StartDeBuff[] sttDebuffs = playersDebuffs;
-            playersDebuffs = new StartDeBuff[3];
-            playersDebuffs[2] = sttDebuffs[0];
-            playersDebuffs[1] = sttDebuffs[1];
+            playersDebuffs = new StartDeBuff[playersDebuffs.Length + 1];
+            for (int i = sttDebuffs.Length; i > 0; i--)
+            {
+                playersDebuffs[i] = sttDebuffs[i - 1];
+            }
+            // playersDebuffs[2] = sttDebuffs[0];
+            // playersDebuffs[1] = sttDebuffs[1];
             if(Random.Range(0 , 100) < 50)
             {
                 playersDebuffs[0] = StartDeBuff.kaminohikari;
@@ -356,9 +380,13 @@ public class FightUIController : MonoBehaviour
     // {
     //     transform.GetComponent<EnemyBornController>().StartBornEnemy();
     // }
-    private void GameOver()              //游戏失败时的显示画面
+    public void GameOver()              //游戏失败时的显示画面
     {
-        
+        fightEndVoice.text = "呜....搞砸了....";
+        kroosFace.sprite = gameoverImage;
+        transform.GetComponent<EnemyBornController>().StopBornEnemy();
+        EndFight();
+        transform.GetComponent<EnemyBornController>().EndFight();
     }
     private void SettlementScreen()      //游戏结束时显示结算界面，开始计算分数
     {
@@ -416,6 +444,8 @@ public class FightUIController : MonoBehaviour
         transform.GetComponent<EnemyBornController>().StopBornEnemy();
         if (nowWave == 3)
         {
+            fightEndVoice.text = "我觉得还可以哦！";
+            kroosFace.sprite = gameEndImage;
             EndFight();
             transform.GetComponent<EnemyBornController>().EndFight();
         }
@@ -458,7 +488,6 @@ public class FightUIController : MonoBehaviour
         {
             if(allObj[i - 1].CompareTag("Enemy"))
             {
-                Debug.Log(allObj[i - 1]);
                 ObjectPool.Instance.PushObject(allObj[i - 1]);
             }
         }
@@ -506,7 +535,7 @@ public class FightUIController : MonoBehaviour
     {
         float timeOfRollScore = 1;
         totleEnemyKillCount = enemyKillInWaves[0] + enemyKillInWaves[1] + enemyKillInWaves[2];
-        totleScore = Mathf.FloorToInt((enemyKillInWaves[0] + enemyKillInWaves[1] * 2 + enemyKillInWaves[2] * 3) * scoreGet);
+        totleScore = Mathf.FloorToInt((enemyKillInWaves[0] * 2 + enemyKillInWaves[1] * 1.5f + enemyKillInWaves[2] * 1) * scoreGet);
         totleEnemyKillCountText.text = 0.ToString();
         totleScoreText.text = 0.ToString();
         while(timeOfRollScore > 0)
@@ -525,5 +554,43 @@ public class FightUIController : MonoBehaviour
             yield return null;
         }
         totleScoreText.text = totleScore.ToString();
+    }
+    public float GetScoreGet()
+    {
+        return scoreGet;
+    }
+    public float GetWave()
+    {
+        return nowWave;
+    }
+    public void ReturnMainMenu()
+    {
+        StartCoroutine(LoadScene());
+    }
+    IEnumerator LoadScene()
+    {
+        loadScreen.SetActive(true);
+        AsyncOperation operation = SceneManager.LoadSceneAsync(1);
+        operation.allowSceneActivation = false;
+        SoundManager.Instance.TurnDownMusic();
+        while (!operation.isDone)
+        {
+            loadSlider.value = operation.progress;
+            if(operation.progress < 0.9f)
+            {
+                loadingText.text = (operation.progress * 100).ToString("f0") + "%";
+            }
+            else
+            {
+                loadSlider.value = 1;
+                loadingText.text = "请按任意键继续~";
+                if(Input.anyKeyDown)
+                {
+                    SoundManager.Instance.TurnUpMusic();
+                    operation.allowSceneActivation = true;
+                }
+            }
+            yield return null;
+        }
     }
 }

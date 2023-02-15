@@ -42,6 +42,8 @@ public class PlayerEnhancement : MonoBehaviour
             speed.y = Mathf.MoveTowards(speed.y , direction.normalized.y * 25 , Mathf.Abs(direction.y) * 42 * Time.deltaTime);
             if(Vector2.Distance(transform.position , target.transform.position) <= 1f)
                 TouchPlayer(type , target);
+
+            transform.up = speed;
         }
         rig.velocity = speed;
     }

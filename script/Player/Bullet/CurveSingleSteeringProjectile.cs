@@ -38,6 +38,8 @@ public class CurveSingleSteeringProjectile : MonoBehaviour
     [SerializeField]private float trailStopTime = 1f;
     private float damage;
     private bool canExplosion;
+    [SerializeField]private GameObject particlePrefab;
+    [SerializeField]private GameObject particlePrefab1;
     void Awake()
     {
         rig = transform.GetComponent<Rigidbody2D>();
@@ -205,6 +207,10 @@ public class CurveSingleSteeringProjectile : MonoBehaviour
         {
             enemyWhoWasShot[i - 1].GetComponent<EnemyBehavior>().OnHit(damage , (enemyWhoWasShot[i - 1].transform.position - transform.position).normalized * Random.Range(20f , 40f));
         }
+        GameObject particle = ObjectPool.Instance.GetObject(particlePrefab);
+        particle.GetComponent<ParticleEffect>().SetData(transform.position);
+        GameObject particle1 = ObjectPool.Instance.GetObject(particlePrefab1);
+        particle1.GetComponent<ParticleEffect>().SetData(transform.position);
     }
     void OnTriggerEnter2D(Collider2D other)
     {

@@ -153,12 +153,12 @@ MonoBehaviour:
   bulletPrefab: {fileID: 5619290262702534563, guid: 97717aedbe045994ba9dfd6c2a23ee61, type: 3}
   bulletSpeed: 50
   originSpeedDistance: 2
-  originSpeedDistanceChange: 1.5
+  originSpeedDistanceChange: 2
   originSpeedDistanceUpLimit: 10
   bulletAcceleration: 3
   minxSpeedX: 6
-  shootColdTime: 0.15
-  shootDeviation: 20
+  shootColdTime: 0.25
+  shootDeviation: 25
   fishRocket: {fileID: 0}
   shinbazu: {fileID: 0}
   gavialsStaff: {fileID: 0}
@@ -169,6 +169,10 @@ MonoBehaviour:
   skill1Speite: {fileID: 21300000, guid: b7cef6e2094ae244f9eb7a0316aac95b, type: 3}
   skill2Speite: {fileID: 21300000, guid: 39b9e4948b8378c4c9e25374ed9255bb, type: 3}
   skill3Speite: {fileID: 21300000, guid: d0b4d0486f733a54fa0e5442c01607d4, type: 3}
+  fireEffect1: {fileID: 8300000, guid: 2b60e0004fdf0cf4eb6cf21377c0a465, type: 3}
+  fireEffect2: {fileID: 8300000, guid: 7d04186fde9bce840ade917bfb02df27, type: 3}
+  fireEffect3: {fileID: 8300000, guid: 80d012bde4968ce4ca527d941cee5cd5, type: 3}
+  fireEffect4: {fileID: 8300000, guid: b551788f54b9f314b90118b6a0d96f12, type: 3}
 --- !u!50 &6110172946663052092
 Rigidbody2D:
   serializedVersion: 4

@@ -21,6 +21,10 @@ public class GavialsSupport : MonoBehaviour
     private Vector4 color;
     private float lifeTimer = 0;
     [SerializeField]private float damage = 150;
+    [SerializeField]public GameObject bangPrefab;
+    private Color bangColor;
+    [SerializeField]private GameObject particlePrefab;
+    [SerializeField]private AudioClip BO;
     // Start is called before the first frame update
     void Start()
     {
@@ -112,6 +116,14 @@ public class GavialsSupport : MonoBehaviour
         this.player = player;
         goBackDir = (player.transform.position + (Vector3.up * 0.5f)) - transform.position;
         goBackDir.y = -goBackDir.y;
+        if (mousePosition.x > transform.position.x)
+        {
+            wRotateSpeed.z = Mathf.Abs(wRotateSpeed.z) * -1;
+        }
+        else
+        {
+            wRotateSpeed.z = Mathf.Abs(wRotateSpeed.z);
+        }
     }
     private void Attack(Vector2 mousePosition)
     {
@@ -137,6 +149,14 @@ public class GavialsSupport : MonoBehaviour
             //     enemyWhoWasShot[i - 1].GetComponent<EnemyBehavior>().DeadFly(new Vector2(Xspeed , 40f - Xspeed));
             // }
         }
+        GameObject particle = ObjectPool.Instance.GetObject(particlePrefab);
+        particle.GetComponent<ParticleEffect>().SetData(transform.position + Vector3.down * 0.5f * transform.localScale.x);
+
+        CameraBehaviour.Instance.CameraShake(0.3f , 0.35f);
+    }
+    private void PlayAudio()
+    {
+        SoundManager.Instance.PlayEffectSound(BO);
     }
     private void treatPlayer()
     {
@@ -145,6 +165,34 @@ public class GavialsSupport : MonoBehaviour
     private void RestoreHP()
     {
         //会生成一个梆字
+    }
+    private void Bang()
+    {
+        GameObject bang = ObjectPool.Instance.GetObject(bangPrefab);
+        RandomColor();
+        bang.GetComponent<Bang>().SetData(player.transform.position + Vector3.up * Random.Range(0f , 2f) + Vector3.right * Random.Range(-2f , 2f) , bangColor , Random.Range(-30f , 30f));
+    }
+    private void RandomColor()
+    {
+        bangColor.r = Random.Range(0f , 1f);
+        bangColor.g = Random.Range(0f , 1f);
+        bangColor.b = Random.Range(0f , 1f);
+        bangColor.a = 1;
+        switch(Random.Range(0 , 3))
+        {
+            case 1:
+                bangColor.r = 1;
+                break;
+            case 2:
+                bangColor.g = 1;
+                break;
+            case 3:
+                bangColor.b = 1;
+                break;
+            default:
+                bangColor.g = 1;
+                break;
+        }
     }
     void OnTriggerEnter2D(Collider2D other)
     {
@@ -160,8 +208,29 @@ public class GavialsSupport : MonoBehaviour
         if(isTreat && other.CompareTag("Player"))
         {
             // treatPlayer();
+            Bang();
+            PlayAudio();
             isTreatPlayer = true;
             player.GetComponent<PlayerMove>().RestoreHP(restoreHP);
         }
     }
+    // void OnTriggerEnter2D(Collision2D other)
+    // {
+    //     if(isAttack && other.collider.CompareTag("Ground"))
+    //     {
+    //         ShootGround();
+    //     }
+    //     if(isAttack && other.collider.CompareTag("Enemy"))
+    //     {
+    //         Vector2 dir = (other.transform.position - transform.position).normalized;
+    //         other.collider.GetComponent<EnemyBehavior>().OnHit(damage , dir * flySpeed * 1.3f);
+    //     }
+    //     if(isTreat && other.collider.CompareTag("Player"))
+    //     {
+    //         // treatPlayer();
+    //         Bang();
+    //         isTreatPlayer = true;
+    //         player.GetComponent<PlayerMove>().RestoreHP(restoreHP);
+    //     }
+    // }
 }

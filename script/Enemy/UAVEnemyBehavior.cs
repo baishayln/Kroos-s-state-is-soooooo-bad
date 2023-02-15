@@ -28,6 +28,11 @@ public class UAVEnemyBehavior : EnemyBehavior
     [SerializeField]public float attack = 3;
     private bool canFollowPlayer;
     private Vector2 ROfenemyCamera;
+    private Vector2 firePointDirection;
+    private Vector2 firePointPosition;
+    private Vector2 gunPosition;
+    [SerializeField]private GameObject gun;
+    [SerializeField]private Transform shootCenterPoint;
     // private Vector3 scale;
     // // Start is called before the first frame update
     override protected void Start()
@@ -39,6 +44,7 @@ public class UAVEnemyBehavior : EnemyBehavior
         shootTimer = shootInterval;
         cameraPoint = GameObject.Find("Main Camera").transform;
         ROfenemyCamera = CameraBehaviour.Instance.ReturnBornPosition();
+        nowHealthUpLimit = healthUpLimit;
         // scale = transform.localScale;
     }
     void OnEnable()
@@ -51,7 +57,7 @@ public class UAVEnemyBehavior : EnemyBehavior
         transform.localScale = Vector3.one;
         transform.GetComponent<BoxCollider2D>().enabled = true;
         transform.rotation = Quaternion.identity;
-        health = healthUpLimit;
+        health = nowHealthUpLimit;
         aimTimer = 0;
         canFollowPlayer = true;
         isShoot = false;
@@ -64,7 +70,33 @@ public class UAVEnemyBehavior : EnemyBehavior
     // {
         
     // }
-    
+    private void MoveFirePoint()
+    {
+        if(target)
+        {
+            firePointDirection.x = target.transform.position.x - shootCenterPoint.position.x;
+            firePointDirection.y = target.transform.position.y - shootCenterPoint.position.y;
+            firePointPosition.x = firePointDirection.normalized.x * 0.25f + shootCenterPoint.position.x;
+            firePointPosition.y = firePointDirection.normalized.y * 0.25f + shootCenterPoint.position.y;
+            shootPoint.position = firePointPosition;
+            gunPosition.x = firePointDirection.normalized.x * 0.125f + shootCenterPoint.position.x;
+            gunPosition.y = firePointDirection.normalized.y * 0.125f + shootCenterPoint.position.y;
+            gun.transform.position = gunPosition;
+            gun.transform.right = shootPoint.transform.position - gun.transform.position;
+        }
+        else
+        {
+            firePointDirection.x = shootCenterPoint.position.x + 1;
+            firePointDirection.y = shootCenterPoint.position.y - 1;
+            firePointPosition.x = firePointDirection.normalized.x * 0.25f + shootCenterPoint.position.x;
+            firePointPosition.y = firePointDirection.normalized.y * 0.25f + shootCenterPoint.position.y;
+            shootPoint.position = firePointPosition;
+            gunPosition.x = firePointDirection.normalized.x * 0.125f + shootCenterPoint.position.x;
+            gunPosition.y = firePointDirection.normalized.y * 0.125f + shootCenterPoint.position.y;
+            gun.transform.position = gunPosition;
+            gun.transform.right = shootPoint.transform.position - gun.transform.position;
+        }
+    }
     override protected void Move()
     {
         moveSpeed.y = Mathf.MoveTowards(moveSpeed.y , 0 , Time.deltaTime * 3);
@@ -82,19 +114,41 @@ public class UAVEnemyBehavior : EnemyBehavior
                 }
                 canFollowPlayer = false;
             }
+            if (canFollowPlayer && player.transform.position.y > transform.position.y)
+            {
+                moveSpeed.y = 4f;
+                canFollowPlayer = false;
+            }
         }
             
         moveSpeed.x = speed * moveDir;
         rig.velocity = moveSpeed;
+        
         // Mathf.MoveTowards(transform.position.x , player.transform.position.x , Time.deltaTime * 10);
+
+        MoveFirePoint();
     }
     override protected void ShootStart()
     {
         isShoot = true;
         aimTimer = aimTime;
+        if (target)
+        {
+            if (target.transform.position.x > transform.position.x)
+            {
+                transform.localScale = Vector3.one;
+            }
+            else
+            {
+                transform.localScale = leftScale;
+            }
+        }
+        
+        MoveFirePoint();
     }
     override protected void Shoot()
     {
+        
         if (!isDead)
         {
             rig.velocity = Vector2.zero;
@@ -135,7 +189,10 @@ public class UAVEnemyBehavior : EnemyBehavior
         {
             shootResult.transform.GetComponent<PlayerMove>().onHit(attack , aimDir.x);
         }
-        ObjectPool.Instance.PushObject(aimLine);
+        if (aimLine)
+        {
+            ObjectPool.Instance.PushObject(aimLine);
+        }
         aimLine = null;     //需要吗？
         line = null;
         isShoot = false;
@@ -168,6 +225,7 @@ public class UAVEnemyBehavior : EnemyBehavior
     }
     override public bool SetBornPosition(Vector3 ROfenemyBorn)
     {
+        SetHealth();
         //地面敌人需要检测地面位置
         if(Random.Range(0 , 2) == 0)
         {
@@ -179,6 +237,7 @@ public class UAVEnemyBehavior : EnemyBehavior
             bornDir = -1;
             moveDir = 1;
         }
+        speed = Random.Range(1f , 1.34f) * 3;
         bornX = bornDir * Random.Range(ROfenemyBorn.x , ROfenemyBorn.x + 5) + CameraBehaviour.Instance.ReturnCameraPosition().x;
         bornPoint = Physics2D.Raycast(new Vector2(bornX , CameraBehaviour.Instance.ReturnCameraPosition().y + ROfenemyBorn.y * 0.7f) , Vector2.down , ROfenemyBorn.y , LayerMask.GetMask("Ground")).point;
         if(bornPoint != null && bornPoint != Vector2.one * -1000)
@@ -233,6 +292,15 @@ public class UAVEnemyBehavior : EnemyBehavior
     {
         target = tgt.gameObject;
     }
+    public void SetHealth()
+    {
+        if (!fightUI)
+        {
+            fightUI = GameObject.Find("FightUI");
+        }
+        nowHealthUpLimit = healthUpLimit + healthIncrease * fightUI.GetComponent<FightUIController>().GetScoreGet() * fightUI.GetComponent<FightUIController>().GetWave();
+        health = nowHealthUpLimit;
+    }
     public void ReMoveTarget()
     {
         target = null;
@@ -269,7 +337,7 @@ public class UAVEnemyBehavior : EnemyBehavior
     {
         // base.IsTooLongOfCamera();
         
-        if (Vector3.Distance(transform.position , cameraPoint.transform.position) > 40)
+        if (Vector3.Distance(transform.position , cameraPoint.transform.position) > 25)
         {
             if(aimTimer >= 0 && line)
             {

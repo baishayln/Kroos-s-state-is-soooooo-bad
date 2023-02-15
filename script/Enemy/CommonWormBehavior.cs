@@ -42,7 +42,7 @@ public class CommonWormBehavior : EnemyBehavior
         transform.localScale = Vector3.one;
         transform.GetComponent<BoxCollider2D>().enabled = true;
         transform.rotation = Quaternion.identity;
-        health = healthUpLimit;
+        health = nowHealthUpLimit;
         attack = normalAttack;
         isFight = true;
         isEscape = false;
@@ -132,8 +132,34 @@ public class CommonWormBehavior : EnemyBehavior
         
         // Mathf.MoveTowards(transform.position.x , player.transform.position.x , Time.deltaTime * 10);
     }
+    override protected void Direction()
+    {
+        if (player && isFight)
+        {
+            if(player.transform.position.x > transform.position.x)
+            {
+                transform.localScale = Vector3.one;
+            }
+            else
+            {
+                transform.localScale = leftScale;
+            }
+        }
+        else
+        {
+            if(rig.velocity.x > 0)
+            {
+                transform.localScale = Vector2.one;
+            }
+            else if(rig.velocity.x < 0)
+            {
+                transform.localScale = leftScale;
+            }
+        }
+    }
     override public bool SetBornPosition(Vector3 ROfenemyBorn)
     {
+        SetHealth();
         //地面敌人需要检测地面位置
         if(Random.Range(0 , 2) == 0)
         {
@@ -162,7 +188,15 @@ public class CommonWormBehavior : EnemyBehavior
         }
         return true;
     }
-    
+    public void SetHealth()
+    {
+        if (!fightUI)
+        {
+            fightUI = GameObject.Find("FightUI");
+        }
+        nowHealthUpLimit = healthUpLimit + healthIncrease * fightUI.GetComponent<FightUIController>().GetScoreGet() * fightUI.GetComponent<FightUIController>().GetWave();
+        health = nowHealthUpLimit;
+    }
     override protected void OnTriggerStay2D(Collider2D other)
     {
         if (other.CompareTag("PlayerBody"))
@@ -174,14 +208,24 @@ public class CommonWormBehavior : EnemyBehavior
     public override void IsTooLongOfCamera()
     {
         // base.IsTooLongOfCamera();
-        
-        if (Vector3.Distance(transform.position , cameraPoint.transform.position) > 40)
+        if (cameraPoint)
         {
-            SetChildToPool();
-            isDead = true;
-            ObjectPool.Instance.PushObject(gameObject);
-            fightUI.GetComponent<EnemyBornController>().EnemyLoss();
-            fightUI.GetComponent<FightUIController>().EnemyLoss();
+            if (Vector3.Distance(transform.position , cameraPoint.transform.position) > 25)
+            {
+                SetChildToPool();
+                isDead = true;
+                ObjectPool.Instance.PushObject(gameObject);
+                fightUI.GetComponent<EnemyBornController>().EnemyLoss();
+                fightUI.GetComponent<FightUIController>().EnemyLoss();
+            }
         }
+        // if (Vector3.Distance(transform.position , cameraPoint.transform.position) > 40)
+        // {
+        //     SetChildToPool();
+        //     isDead = true;
+        //     ObjectPool.Instance.PushObject(gameObject);
+        //     fightUI.GetComponent<EnemyBornController>().EnemyLoss();
+        //     fightUI.GetComponent<FightUIController>().EnemyLoss();
+        // }
     }
 }

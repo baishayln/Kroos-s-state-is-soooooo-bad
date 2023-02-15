@@ -74,8 +74,8 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: db750325989564987a34393247d883b4, type: 3}
-  m_Color: {r: 0, g: 1, b: 0.26544213, a: 1}
+  m_Sprite: {fileID: -5552389928622531293, guid: e231d0c6b9221474bb91d6ef8174dd4f, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -99,10 +99,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   flySpeed: 36
   supportSpeed: 30
-  wRotateSpeed: {x: 0, y: 0, z: 1080}
+  wRotateSpeed: {x: 0, y: 0, z: -2160}
   destroyDsts: 1
-  restoreHP: 5
-  damage: 60
+  restoreHP: 3
+  damage: 80
+  bangPrefab: {fileID: 8789431570674157383, guid: bedd15dbed83bac41a7f9ff49ad7ccf1, type: 3}
+  particlePrefab: {fileID: 3071698398917870606, guid: 600ffeaaaebe40e42929513ba14e8984, type: 3}
+  BO: {fileID: 8300000, guid: 798495cc0e349874d9e9c0ced056bd9a, type: 3}
 --- !u!50 &5624959680329714394
 Rigidbody2D:
   serializedVersion: 4
@@ -137,16 +140,16 @@ BoxCollider2D:
   m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: 0.0018794239, y: 0.018793225}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 1}
+    oldSize: {x: 0.54333335, y: 1.5666667}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 0.38734084, y: 1.3082092}
   m_EdgeRadius: 0

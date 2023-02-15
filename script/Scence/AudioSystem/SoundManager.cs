@@ -23,7 +23,9 @@ public class SoundManager : MonoBehaviour
     [SerializeField]private AudioSource musicPlayer;
     [SerializeField]private AudioSource effectPlayer;
     [SerializeField]private AudioSource voicePlayer;
-
+    private float musicVolumeRecord;
+    private float effectVolumeRecord;
+    private float voiceVolumeRecord;
     void Awake()
     {
         if(instance == null)
@@ -50,17 +52,45 @@ public class SoundManager : MonoBehaviour
         voicePlayer.PlayOneShot(clip);
     }
 
-    public void PauseMusicSound(AudioClip clip)
+    public void PauseMusicSound()
     {
         musicPlayer.Pause();
     }
-    public void PauseEffectSound(AudioClip clip)
+    public void UnPauseMusicSound()
+    {
+        musicPlayer.UnPause();
+    }
+    public void PauseEffectSound()
     {
         effectPlayer.Pause();
     }
-    public void PauseVoiceSound(AudioClip clip)
+    public void PauseVoiceSound()
     {
         voicePlayer.Pause();
+    }
+    public void StopMusicSound()
+    {
+        musicPlayer.Stop();
+    }
+    public void StopEffectSound()
+    {
+        effectPlayer.Stop();
+    }
+    public void StopVoiceSound()
+    {
+        voicePlayer.Stop();
+    }
+    public void ContinueMusicSound()
+    {
+        musicPlayer.Play();
+    }
+    public void ContinueEffectSound()
+    {
+        effectPlayer.Play();
+    }
+    public void ContinueVoiceSound()
+    {
+        voicePlayer.Play();
     }
 
     public void ChangeMusicVolume(float value)
@@ -74,6 +104,18 @@ public class SoundManager : MonoBehaviour
     public void ChangeVoiceVolume(float value)
     {
         voicePlayer.volume = value;
+    }
+    public float ReturnMusicVolume()
+    {
+        return musicPlayer.volume;
+    }
+    public float ReturnEffectVolume()
+    {
+        return effectPlayer.volume;
+    }
+    public float ReturnVoiceVolume()
+    {
+        return voicePlayer.volume;
     }
 
     public void MuteMusicSound()
@@ -99,5 +141,97 @@ public class SoundManager : MonoBehaviour
             voicePlayer.Pause();
         }
         voicePlayer.mute = !voicePlayer.mute;
+    }
+    public float GetBGMPlayTime()
+    {
+        return musicPlayer.time;
+    }
+    public void TurnDownMusic()
+    {
+        StartCoroutine(DownMusic());
+    }
+    public void TurnDownEffect()
+    {
+        StartCoroutine(DownEffect());
+    }
+    public void TurnDownVoice()
+    {
+        StartCoroutine(DownVoice());
+    }
+    public void TurnUpMusic()
+    {
+        StartCoroutine(RecoveryMusic());
+    }
+    public void TurnUpEffect()
+    {
+        StartCoroutine(RecoveryEffect());
+    }
+    public void TurnUpVoice()
+    {
+        StartCoroutine(RecoveryVoice());
+    }
+    IEnumerator DownMusic()
+    {
+        float timer = 0;
+        musicVolumeRecord = musicPlayer.volume;
+        while (musicPlayer.volume > 0 && timer < 2)
+        {
+            timer += Time.deltaTime;
+            musicPlayer.volume -= Time.deltaTime;
+            yield return null;
+        }
+        StopMusicSound();
+    }
+    IEnumerator DownEffect()
+    {
+        float timer = 0;
+        effectVolumeRecord = effectPlayer.volume;
+        while (effectPlayer.volume > 0 && timer < 2)
+        {
+            timer += Time.deltaTime;
+            effectPlayer.volume -= Time.deltaTime;
+            yield return null;
+        }
+    }
+    IEnumerator DownVoice()
+    {
+        float timer = 0;
+        voiceVolumeRecord = voicePlayer.volume;
+        while (voicePlayer.volume > 0 && timer < 2)
+        {
+            timer += Time.deltaTime;
+            voicePlayer.volume -= Time.deltaTime;
+            yield return null;
+        }
+    }
+    IEnumerator RecoveryMusic()
+    {
+        float timer = 0;
+        while (musicPlayer.volume < musicVolumeRecord && timer < 3)
+        {
+            timer += Time.deltaTime;
+            musicPlayer.volume += Time.deltaTime;
+            yield return null;
+        }
+    }
+    IEnumerator RecoveryEffect()
+    {
+        float timer = 0;
+        while (effectPlayer.volume < effectVolumeRecord && timer < 3)
+        {
+            timer += Time.deltaTime;
+            effectPlayer.volume += Time.deltaTime;
+            yield return null;
+        }
+    }
+    IEnumerator RecoveryVoice()
+    {
+        float timer = 0;
+        while (voicePlayer.volume < voiceVolumeRecord && timer < 3)
+        {
+            timer += Time.deltaTime;
+            voicePlayer.volume += Time.deltaTime;
+            yield return null;
+        }
     }
 }

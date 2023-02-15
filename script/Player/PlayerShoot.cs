@@ -50,7 +50,10 @@ public class PlayerShoot : MonoBehaviour
     [SerializeField]public Sprite skill1Speite;
     [SerializeField]public Sprite skill2Speite;
     [SerializeField]public Sprite skill3Speite;
-    
+    [SerializeField]public AudioClip fireEffect1;
+    [SerializeField]public AudioClip fireEffect2;
+    [SerializeField]public AudioClip fireEffect3;
+    [SerializeField]public AudioClip fireEffect4;
 
 
     // private UI
@@ -75,7 +78,7 @@ public class PlayerShoot : MonoBehaviour
         SkillList.Add(PlayerEnhancementType.skill3 , new GavialsAssistance(gameObject));
         fightUI = GameObject.Find("FightUI");
         now1stSkill = SkillList[PlayerEnhancementType.skill3];
-        now2ndSkill = SkillList[PlayerEnhancementType.skill2];
+        now2ndSkill = SkillList[PlayerEnhancementType.skill1];
     }
 
     // Update is called once per frame
@@ -83,7 +86,7 @@ public class PlayerShoot : MonoBehaviour
     {
         if(Input.GetKeyDown(KeyCode.Q))
         {
-            // if(fightUI.GetComponent<FightUIController>().GetSkillCold() <= 0 && now1stSkill != null)
+            if(fightUI.GetComponent<FightUIController>().GetSkillCold() <= 0 && now1stSkill != null)
                 ReleaseSkills();
         }
         if(cantStopShoot)
@@ -270,6 +273,17 @@ public class PlayerShoot : MonoBehaviour
         }
         //播放声音，从游戏里录？
     }
+    public bool CanChangeSkillSprite()
+    {
+        if (now1stSkill != null && now2ndSkill != null)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
     public Sprite GetSkillSprite(int skill)
     {
         if (skill == 0)
@@ -323,16 +337,16 @@ public class PlayerShoot : MonoBehaviour
                 attack -= 2;
                 break;
             case StartDeBuff.IntervalDown:
-                shootColdTime += 0.04f;
+                shootColdTime += 0.1f;
                 break;
             case StartDeBuff.ScatterDown:
-                shootDeviation += 4f;
+                shootDeviation += 10f;
                 break;
             case StartDeBuff.RangeDown:
-                originSpeedDistance -= 1;
+                originSpeedDistance -= 2;
                 break;
             case StartDeBuff.CantStopShoot:
-                shootColdTime -= 0.04f;
+                shootColdTime -= 0.05f;
                 cantStopShoot = true;
                 break;
             case StartDeBuff.DoubleGun:
@@ -361,6 +375,7 @@ public class PlayerShoot : MonoBehaviour
             firePointDirection = bullet.transform.right;
         }
         bullet.GetComponent<PlayerBullet>().SetBullet(attack , bulletSpeed , firePointDirection.normalized , transform , originSpeedDistance , bulletAcceleration , minxSpeedX);        //方向需要重新计算
+        PlayAudio();
     }
     private void GetMousePoint()
     {
@@ -405,7 +420,7 @@ public class PlayerShoot : MonoBehaviour
     public StartDeBuff[] GiveDebuffs(int debuffNum)
     {
         int GotDbuff = -1;
-        StartDeBuff[] debuffs = new StartDeBuff[2];
+        StartDeBuff[] debuffs = new StartDeBuff[debuffNum];
         for(int i = 0; i < debuffNum ; i++)
         {
             switch (Random.Range(0 , 4))
@@ -447,6 +462,7 @@ public class PlayerShoot : MonoBehaviour
                     GotDbuff = 3;
                     break;
                 default:
+                    i--;
                     break;
             }
         }
@@ -478,5 +494,26 @@ public class PlayerShoot : MonoBehaviour
             health += restoreNum;
         }
         return health;
+    }
+    private void PlayAudio()
+    {
+        switch(Random.Range(0 , 4))
+        {
+            case 0:
+                SoundManager.Instance.PlayEffectSound(fireEffect1);
+                break;
+            case 1:
+                SoundManager.Instance.PlayEffectSound(fireEffect2);
+                break;
+            case 2:
+                SoundManager.Instance.PlayEffectSound(fireEffect3);
+                break;
+            case 3:
+                SoundManager.Instance.PlayEffectSound(fireEffect4);
+                break;
+            default:
+                SoundManager.Instance.PlayEffectSound(fireEffect4);
+                break;
+        }
     }
 }

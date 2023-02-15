@@ -12,7 +12,7 @@ public interface PlayerSkill
 public class MagellansFishBullet : PlayerSkill
 {
     [SerializeField]public Sprite skillImage;
-    private float skillColdTime = 10;
+    private float skillColdTime = 8;
     private PlayerShoot playerShoot;
     private PlayerMove playerMove;
     private Vector2 SkillReleasePoint;
@@ -30,7 +30,7 @@ public class MagellansFishBullet : PlayerSkill
     
     public float ReleaseSkill(Vector2 mousePosition)
     {
-        launcher.LaunchRocket(8 , 0);
+        launcher.LaunchRocket(8 , 10);
         return skillColdTime;
     }
     public float ReleaseSkill(Vector2 mousePosition , float damage)
@@ -48,7 +48,7 @@ public class MagellansFishBullet : PlayerSkill
 public class Kaminobazu : PlayerSkill
 {
     // [SerializeField]public Sprite skillImage;
-    private float skillColdTime = 10;
+    private float skillColdTime = 12;
     private PlayerShoot playerShoot;
     private PlayerMove playerMove;
     private GameObject KaminobazuPrefab;
@@ -81,7 +81,7 @@ public class Kaminobazu : PlayerSkill
 public class GavialsAssistance : PlayerSkill        //从屏幕外上方一定区域内飞来一个嘉维尔的医疗杖，在飞过玩家头时触发一个表示敲击的动画，弹出“绑”字（嘉维尔为战场上奋战的克洛丝送来了援助，快说谢谢嘉维尔），命中后会飞到屏幕对侧的高处，做一个类似滑行降落的弹道效果，满血则会砸到地面上造成AOE，技能CD长
 {
     // [SerializeField]public Sprite skillImage;
-    private float skillColdTime = 15;
+    private float skillColdTime = 16;
     private PlayerShoot playerShoot;
     private PlayerMove playerMove;
     private GameObject realMedicalSuppliesPrefab;

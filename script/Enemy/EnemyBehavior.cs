@@ -5,6 +5,8 @@ using UnityEngine;
 public class EnemyBehavior : MonoBehaviour
 {
     [SerializeField]public float healthUpLimit = 30;
+    protected float nowHealthUpLimit = 30;
+    [SerializeField]protected float healthIncrease = 5;
     [SerializeField]public float health;
     [SerializeField]public float shootInterval = 3;
     protected float shootTimer;
@@ -16,7 +18,7 @@ public class EnemyBehavior : MonoBehaviour
     public GameObject playerGeneratePrefab;
     [SerializeField]public float healthConstant;
     public float rewardProbabilty = 20;
-    [SerializeField]public float DropProbability = 15;
+    [SerializeField]public float bornEnhancementProbability = 20;
     [SerializeField]public GameObject Enhancement1;
     [SerializeField]public GameObject Enhancement2;
     [SerializeField]public GameObject Enhancement3;
@@ -40,6 +42,7 @@ public class EnemyBehavior : MonoBehaviour
     protected float escapeTimer = 0;
     private float hitedMove = 1.5f;
     protected Vector2 moveSpeed = new Vector2(0 , 0);
+    protected Vector3 leftScale = new Vector3(-1 , 1 , 1);
     //      添加一个全局变量控制怪物波数
     // Start is called before the first frame update
     virtual protected void Start()
@@ -99,6 +102,18 @@ public class EnemyBehavior : MonoBehaviour
         {
             transform.localScale = new Vector3(transform.localScale.x - Time.deltaTime * 2 , transform.localScale.y - Time.deltaTime * 2 , transform.localScale.z - Time.deltaTime * 2);
         }
+        Direction();
+    }
+    virtual protected void Direction()
+    {
+        if(rig.velocity.x > 0)
+        {
+            transform.localScale = Vector3.one;
+        }
+        else if(rig.velocity.x < 0)
+        {
+            transform.localScale = leftScale;
+        }
     }
     virtual protected void Move()
     {
@@ -137,34 +152,71 @@ public class EnemyBehavior : MonoBehaviour
     {
         EnemyCountDown();
         //      命中时向后击退的幅度变大有可能会飞起一定高度，在一段时间后销毁（闪烁消失？）
-        if(Random.Range(0 , 100) < DropProbability)
+        if(Random.Range(0 , 100) < bornEnhancementProbability)
         {
-            switch (Random.Range(0 , 7))
+            if (Random.Range(0 , 100) < 90)
             {
-                case 0:
-                    GenerateRewards(Enhancement1);
-                    break;
-                case 1:
-                    GenerateRewards(Enhancement2);
-                    break;
-                case 2:
-                    GenerateRewards(Enhancement3);
-                    break;
-                case 3:
-                    GenerateRewards(Enhancement4);
-                    break;
-                case 4:
-                    GenerateRewards(Enhancement5);
-                    break;
-                case 5:
-                    GenerateRewards(Enhancement6);
-                    break;
-                case 6:
-                    GenerateRewards(Enhancement7);
-                    break;
-                default:
-                    break;
+                switch (Random.Range(0 , 4))
+                {
+                    case 0:
+                        GenerateRewards(Enhancement1);
+                        break;
+                    case 1:
+                        GenerateRewards(Enhancement2);
+                        break;
+                    case 2:
+                        GenerateRewards(Enhancement3);
+                        break;
+                    case 3:
+                        GenerateRewards(Enhancement4);
+                        break;
+                    default:
+                        break;
+                }
             }
+            else
+            {
+                switch (Random.Range(4 , 7))
+                {
+                    case 4:
+                        GenerateRewards(Enhancement5);
+                        break;
+                    case 5:
+                        GenerateRewards(Enhancement6);
+                        break;
+                    case 6:
+                        GenerateRewards(Enhancement7);
+                        break;
+                    default:
+                        break;
+                }
+            }
+            // switch (Random.Range(0 , 7))
+            // {
+            //     case 0:
+            //         GenerateRewards(Enhancement1);
+            //         break;
+            //     case 1:
+            //         GenerateRewards(Enhancement2);
+            //         break;
+            //     case 2:
+            //         GenerateRewards(Enhancement3);
+            //         break;
+            //     case 3:
+            //         GenerateRewards(Enhancement4);
+            //         break;
+            //     case 4:
+            //         GenerateRewards(Enhancement5);
+            //         break;
+            //     case 5:
+            //         GenerateRewards(Enhancement6);
+            //         break;
+            //     case 6:
+            //         GenerateRewards(Enhancement7);
+            //         break;
+            //     default:
+            //         break;
+            // }
         }
         // Destroy(gameObject);
         // SetChildToPool();
@@ -202,6 +254,10 @@ public class EnemyBehavior : MonoBehaviour
         }
         
         moveSpeed.x += hitDir * hitedMove;
+        if (!rig)
+        {
+            rig = transform.GetComponent<Rigidbody2D>();
+        }
         rig.velocity = moveSpeed;
         isFight = true;
         isEscape = false;

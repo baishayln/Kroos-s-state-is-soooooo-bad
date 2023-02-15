@@ -26,6 +26,11 @@ public class LightingArea : MonoBehaviour
     protected Transform nextTarget;
     [SerializeField]private GameObject lightningPrefab;
     private Transform targetEnemy;
+    [SerializeField]public AudioClip attackEffect1;
+    [SerializeField]public AudioClip attackEffect2;
+    [SerializeField]public AudioClip attackEffect3;
+    [SerializeField]public AudioClip attackEffect4;
+    [SerializeField]public AudioClip attackEffect5;
     // Start is called before the first frame update
     void Start()
     {
@@ -115,6 +120,30 @@ public class LightingArea : MonoBehaviour
         }
         
     }
+    private void PlayAudio()
+    {
+        switch(Random.Range(0 , 5))
+        {
+            case 0:
+                SoundManager.Instance.PlayEffectSound(attackEffect1);
+                break;
+            case 1:
+                SoundManager.Instance.PlayEffectSound(attackEffect2);
+                break;
+            case 2:
+                SoundManager.Instance.PlayEffectSound(attackEffect3);
+                break;
+            case 3:
+                SoundManager.Instance.PlayEffectSound(attackEffect4);
+                break;
+            case 4:
+                SoundManager.Instance.PlayEffectSound(attackEffect5);
+                break;
+            default:
+                SoundManager.Instance.PlayEffectSound(attackEffect5);
+                break;
+        }
+    }
     public void BornLightningAttack(Transform targetEnemy)
     {
         attackAimResult = Physics2D.Raycast(targetEnemy.position , Vector2.down , CameraBehaviour.Instance.ReturnBornPosition().y * 2 , LayerMask.GetMask("Ground"));
@@ -128,6 +157,7 @@ public class LightingArea : MonoBehaviour
         {
             lightning.transform.position = targetEnemy.position;
         }
+        PlayAudio();
     }
     void OnTriggerEnter2D(Collider2D other)
     {

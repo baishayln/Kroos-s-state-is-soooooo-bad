@@ -26,6 +26,10 @@ public class PlayerBullet : MonoBehaviour
     [SerializeField]private GameObject tarilPrefab;
     private GameObject taril;
     private GameObject cameraPoint;
+    [SerializeField]public AudioClip hitEffect1;
+    [SerializeField]public AudioClip hitEffect2;
+    [SerializeField]public AudioClip hitEffect3;
+    [SerializeField]public AudioClip hitEffect4;
 
     //      如果碰撞到地面会存在一段时间然后逐渐消失
     void Start()
@@ -196,6 +200,27 @@ public class PlayerBullet : MonoBehaviour
         }
         // startxHisTr = false;
     }
+    private void PlayAudio()
+    {
+        switch(Random.Range(0 , 4))
+        {
+            case 0:
+                SoundManager.Instance.PlayEffectSound(hitEffect1);
+                break;
+            case 1:
+                SoundManager.Instance.PlayEffectSound(hitEffect2);
+                break;
+            case 2:
+                SoundManager.Instance.PlayEffectSound(hitEffect3);
+                break;
+            case 3:
+                SoundManager.Instance.PlayEffectSound(hitEffect4);
+                break;
+            default:
+                SoundManager.Instance.PlayEffectSound(hitEffect4);
+                break;
+        }
+    }
     private void Hit(Transform hitTarget)
     {
         // rotateOfHiting = transform.rotation.eulerAngles;
@@ -210,6 +235,11 @@ public class PlayerBullet : MonoBehaviour
         selfScale.y = originScale.y/hitTarget.transform.localScale.y;
         selfScale.z = originScale.z/hitTarget.transform.localScale.z;
 
+        if(selfScale.z !> 0)
+        {
+            selfScale.z = 1;
+        }
+
         transform.localScale = selfScale;
         
         isHiting = true;
@@ -217,12 +247,15 @@ public class PlayerBullet : MonoBehaviour
         rig.bodyType = RigidbodyType2D.Kinematic;
         if(hitTarget.CompareTag("Enemy"))
             hitTarget.GetComponent<EnemyBehavior>().OnHit(damage , transform.right.x);
+
+        PlayAudio();
     }
     private void Hit()
     {
         isHiting = true;
         rig.velocity = Vector2.zero;
         rig.bodyType = RigidbodyType2D.Kinematic;
+        PlayAudio();
     }
     
     public void SetRrail()

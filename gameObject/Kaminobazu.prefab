@@ -75,3 +75,8 @@ MonoBehaviour:
   lightingAttackJumpNum: 4
   lightingAttackJumpR: 3
   lightningPrefab: {fileID: 5240830004958578654, guid: d2844d0e9c3e1fa4fa82b7395f11890e, type: 3}
+  attackEffect1: {fileID: 8300000, guid: ba1a70538fc4eab44bbef8945891fa7f, type: 3}
+  attackEffect2: {fileID: 8300000, guid: 93aa43c08e6c93540b286283fa0d482a, type: 3}
+  attackEffect3: {fileID: 8300000, guid: 9313d96b53d91184bbfc3ff1e2804951, type: 3}
+  attackEffect4: {fileID: 8300000, guid: 7d858043891f0c942a3d90cda85647d2, type: 3}
+  attackEffect5: {fileID: 8300000, guid: d60a4ccf3bc3fc241a13012dcdaa66ec, type: 3}

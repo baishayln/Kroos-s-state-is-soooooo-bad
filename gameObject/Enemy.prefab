@@ -74,7 +74,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: db750325989564987a34393247d883b4, type: 3}
+  m_Sprite: {fileID: -4878473907785146300, guid: 5a15dc9e0105ed141bbc158a8782701c, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -102,7 +102,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 1}
+    oldSize: {x: 1.2475, y: 0.81125}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -144,7 +144,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e83765178d2a5bf43a5c8a4aeacc9981, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  healthUpLimit: 30
+  healthUpLimit: 40
+  healthIncrease: 5
   health: 0
   shootInterval: 3
   minInclusive: 2
@@ -153,7 +154,7 @@ MonoBehaviour:
   playerGeneratePrefab: {fileID: 0}
   healthConstant: 0
   rewardProbabilty: 20
-  DropProbability: 15
+  bornEnhancementProbability: 20
   Enhancement1: {fileID: 8048362587209333708, guid: c2886c3668142ee46aea2c409b9ba462, type: 3}
   Enhancement2: {fileID: 7028138903678308492, guid: 8c529c0803e9ca843bc1571200839a54, type: 3}
   Enhancement3: {fileID: 4208622843047809618, guid: 2a0e768a996d8144f943bcc1af070625, type: 3}
@@ -161,7 +162,11 @@ MonoBehaviour:
   Enhancement5: {fileID: 2295657095240757312, guid: 660e013ddf836854489c0dc76691d96c, type: 3}
   Enhancement6: {fileID: 3465438320738468220, guid: d5313c1cab5e7434c8acc4538d828881, type: 3}
   Enhancement7: {fileID: 7400559642884997951, guid: 4bf6144ad2796b942a8b58456ac65240, type: 3}
+  isDead: 0
   wRotateSpeed: {x: 0, y: 0, z: 360}
   rayCastDsts: 30
   normalAttack: 1
   dashAttack: 2
+  moveDir: 0
+  escapeDir: 0
+  checkBoxSize: {x: 0.5, y: 2}

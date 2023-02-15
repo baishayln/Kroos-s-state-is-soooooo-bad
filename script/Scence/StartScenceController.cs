@@ -33,6 +33,7 @@ public class StartScenceController : MonoBehaviour
     private Color UIColor;
     [SerializeField]private AudioClip uiEffect;
     [SerializeField]private AudioClip BGM;
+    [SerializeField]private UIOrnamentController UIOrnamentController;
     //      UI适配部分，被Unity自带功能替换
     // [SerializeField]private float basicScreenX = 811;
     // [SerializeField]private float basicScreenY = 456;
@@ -183,10 +184,11 @@ public class StartScenceController : MonoBehaviour
     }
     public void PlayBGM()
     {
-        if (BGM)
-        {
-            SoundManager.Instance.PlayMusicSound(BGM);
-        }
+        // if (BGM)
+        // {
+        //     SoundManager.Instance.PlayMusicSound(BGM);
+        // }
+        SoundManager.Instance.ContinueMusicSound();
     }
     public void PlayAudio()
     {
@@ -251,15 +253,34 @@ public class StartScenceController : MonoBehaviour
         {
             mainMenu.SetActive(true);
             title.SetActive(true);
+            isShowSetting = false;
+            UIOrnamentController.SetVisible();
         }
         if(nextUI == TypeOfUI.StageChoise)
         {
             stageChoise.SetActive(true);
+            isShowSetting = false;
+            UIOrnamentController.SetInvisible();
         }
         if(nextUI == TypeOfUI.Setting)
         {
-            setting.SetActive(true);
+            if (!isShowSetting)
+            {
+                mainMenu.SetActive(true);
+                title.SetActive(false);
+                setting.SetActive(true);
+                isShowSetting = true;
+                UIOrnamentController.SetInvisible();
+            }
+            else
+            {
+                QuitSetting();
+            }
         }
+    }
+    public void ShowUIOrnament()
+    {
+        UIOrnamentController.ShowUIOrnament();
     }
     public void ChangeUIComplete()
     {
@@ -308,6 +329,7 @@ public class StartScenceController : MonoBehaviour
         loadScreen.SetActive(true);
         AsyncOperation operation = SceneManager.LoadSceneAsync(stageNum);
         operation.allowSceneActivation = false;
+        SoundManager.Instance.TurnDownMusic();
         while (!operation.isDone)
         {
             loadSlider.value = operation.progress;
@@ -321,7 +343,9 @@ public class StartScenceController : MonoBehaviour
                 loadingText.text = "请按任意键继续~";
                 if(Input.anyKeyDown)
                 {
+                    SoundManager.Instance.StopMusicSound();
                     operation.allowSceneActivation = true;
+                    SoundManager.Instance.TurnUpMusic();
                 }
             }
             yield return null;
@@ -345,6 +369,7 @@ public class StartScenceController : MonoBehaviour
         setting.SetActive(false);
         title.SetActive(true);
         isShowSetting = false;
+        UIOrnamentController.SetVisible();
     }
     public void QuitGame()
     {

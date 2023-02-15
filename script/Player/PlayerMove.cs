@@ -50,6 +50,7 @@ public class PlayerMove : MonoBehaviour
     [SerializeField]private float rendererFlashInterval = 0.15f;
     private float rendererFlashIntervalTimer;
     private SpriteRenderer playerRenderer;
+    private Vector2 leftScale = new Vector2(-1 , 1);
     
     // private Vector2 p
     // Start is called before the first frame update
@@ -208,6 +209,15 @@ public class PlayerMove : MonoBehaviour
             }
             invincibleTimer -= Time.deltaTime;
         }
+        
+        if(rig.velocity.x >= 0)
+        {
+            transform.localScale = Vector2.one;
+        }
+        else
+        {
+            transform.localScale = leftScale;
+        }
         // if (dashTimer > 0)
         // {   
         //     if (dashTimer <= Time.deltaTime)
@@ -265,7 +275,7 @@ public class PlayerMove : MonoBehaviour
             // Debug.Log("下平台");
         }
     }
-    public void onHit(float  damage , float dir)
+    public float onHit(float  damage , float dir)
     {
         if(!isInvincible)
         {
@@ -287,9 +297,15 @@ public class PlayerMove : MonoBehaviour
             rig.velocity = speed;
             cantShootTimer = cantShootTime;
             transform.GetComponent<PlayerShoot>().CantShoot();
+            if(health <= 0)
+            {
+                FightUI.GetComponent<FightUIController>().GameOver();
+            }
+            CameraBehaviour.Instance.CameraShake(0.2f , 0.25f);
         }
+        return health;
     }
-    public void onHit(float  damage)
+    public float onHit(float  damage)
     {
         isHited = true;
         health -= damage;
@@ -298,6 +314,12 @@ public class PlayerMove : MonoBehaviour
         invincibleTimer = onHitInvincibleTime;
         cantShootTimer = cantShootTime;
         transform.GetComponent<PlayerShoot>().CantShoot();
+        if(health <= 0)
+        {
+            FightUI.GetComponent<FightUIController>().GameOver();
+        }
+        CameraBehaviour.Instance.CameraShake(0.2f , 0.25f);
+        return health;
     }
     // private void Dash()                    //原本的冲刺函数
     // {

@@ -101,6 +101,10 @@ MonoBehaviour:
   minxSpeedX: 0
   scale: {x: 0.3, y: 0.3, z: 1}
   tarilPrefab: {fileID: 9160057374794696150, guid: 243c2dad7e8df694dbf840c65a6055f1, type: 3}
+  hitEffect1: {fileID: 8300000, guid: c70a27c7af71764439a532d5bbee89cb, type: 3}
+  hitEffect2: {fileID: 8300000, guid: a41f275353addd5429565632b4e02da9, type: 3}
+  hitEffect3: {fileID: 8300000, guid: 4a43ad1beb7d52c4bace20d37c48439a, type: 3}
+  hitEffect4: {fileID: 8300000, guid: 3865fa995d2a0e54788d598c9e9aa2ea, type: 3}
 --- !u!50 &5406581930687538525
 Rigidbody2D:
   serializedVersion: 4
