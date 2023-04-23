@@ -26,6 +26,8 @@ public class SoundManager : MonoBehaviour
     private float musicVolumeRecord;
     private float effectVolumeRecord;
     private float voiceVolumeRecord;
+    [SerializeField]private AudioClip BGM1;
+    [SerializeField]private AudioClip BGM2;
     void Awake()
     {
         if(instance == null)
@@ -37,6 +39,19 @@ public class SoundManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
+    }
+    // Start is called before the first frame update
+    public void PlayBGM1()
+    {
+        musicPlayer.clip = BGM1;
+        musicPlayer.time = 0;
+        ChangeMusicVolume(1);
+    }
+    public void PlayBGM2()
+    {
+        musicPlayer.clip = BGM2;
+        musicPlayer.time = 0;
+        ChangeMusicVolume(1);
     }
     // Start is called before the first frame update
     public void PlayMusicSound(AudioClip clip)
@@ -180,6 +195,7 @@ public class SoundManager : MonoBehaviour
             musicPlayer.volume -= Time.deltaTime;
             yield return null;
         }
+        musicPlayer.time = 0;
         StopMusicSound();
     }
     IEnumerator DownEffect()

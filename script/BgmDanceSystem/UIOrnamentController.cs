@@ -65,7 +65,11 @@ public class UIOrnamentController : MonoBehaviour
         isVisible = true;
         for (int i = transform.childCount - 1; i >= 0; i--)
         {
-            if (transform.GetChild(i).GetComponent<Image>())
+            if(transform.GetChild(i).GetComponent<SelfColor>())                //如果该子物体存在自己的颜色，则调用该子物体函数回调为其本身的颜色，而不是赋值为Color.one
+            {
+                transform.GetChild(i).GetComponent<SelfColor>().ColorCallback();
+            }
+            else if (transform.GetChild(i).GetComponent<Image>())
             {
                 transform.GetChild(i).GetComponent<Image>().color = visible;
             }

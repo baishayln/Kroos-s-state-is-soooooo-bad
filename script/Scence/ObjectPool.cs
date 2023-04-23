@@ -98,6 +98,9 @@ public class ObjectPool
         // Debug.Log(obj.transform.parent);
         obj.SetActive(false);
     }
-
+    public void ClearQueue()
+    {
+        instance.objectPool.Clear();
+    }
 
 }

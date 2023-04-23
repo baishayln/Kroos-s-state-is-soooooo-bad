@@ -33,10 +33,20 @@ public class DancePlayer : MonoBehaviour
     private float singingTimer = 0;
     [SerializeField]private Animator animator;
     [SerializeField]private GameObject colouredRibbonPrefab;
-    [SerializeField]private GameObject notePrefab;
+    [SerializeField]private GameObject notePrefab1;
+    [SerializeField]private GameObject notePrefab2;
+    [SerializeField]private GameObject notePrefab3;
+    // [SerializeField]private GameObject notePrefab4;
+    // [SerializeField]private GameObject notePrefab5;
+    // [SerializeField]private GameObject notePrefab6;
+    // [SerializeField]private GameObject notePrefab7;
+    [SerializeField]private GameObject colouredRibbonPrefab1;
+    [SerializeField]private GameObject colouredRibbonPrefab2;
+    [SerializeField]private GameObject colouredRibbonPrefab3;
     [SerializeField]private int ribbonCount = 5;
     // [SerializeField]private int sinkingDistance = 20;
     private Transform ribbonBornPoint;
+    [SerializeField]private Transform noteBornPoint;
     [SerializeField]private UIOrnamentController UIO;
 
     // Start is called before the first frame update
@@ -73,7 +83,10 @@ public class DancePlayer : MonoBehaviour
         
         if(BGMPlayTime > SoundManager.Instance.GetBGMPlayTime())
         {
-            nowDanceActCount = 0;
+            if(!Input.GetKey(KeyCode.Q))
+            {
+                nowDanceActCount = 0;
+            }
             for (int i = isActDone.Length - 1; i >= 0; i--)
             {
                 isActDone[i] = false;
@@ -135,7 +148,7 @@ public class DancePlayer : MonoBehaviour
             if (nowBCount > danceActionBPMCount[nowDanceActCount] && isActDone[nowDanceActCount] != true)
             {
                 ExecuteCurrentAction();
-                Debug.Log(nowDanceActCount);
+                // Debug.Log(nowDanceActCount);
             }
         }
 
@@ -187,29 +200,52 @@ public class DancePlayer : MonoBehaviour
     {
         if(UIO.GetIsVisible())
         {
-            GameObject note = ObjectPool.Instance.GetObject(notePrefab);
-            note.transform.position = ribbonBornPoint.position;
+            GameObject note = ObjectPool.Instance.GetObject(RollANote());
+            note.transform.position = noteBornPoint.position;
             // note.transform.parent = transform.parent;
             note.transform.SetParent(transform.parent , true);
         }
         else
         {
-            GameObject note = ObjectPool.Instance.GetObject(notePrefab);
-            note.transform.position = ribbonBornPoint.position;
+            GameObject note = ObjectPool.Instance.GetObject(RollANote());
+            note.transform.position = noteBornPoint.position;
             note.transform.SetParent(transform.parent , true);
             note.GetComponent<Image>().color = UIO.GetInVisibleColor();
+        }
+    }
+    private GameObject RollANote()
+    {
+        switch(Random.Range(1 , 4))
+        {
+            case 1:
+                return notePrefab1;
+            case 2:
+                return notePrefab2;
+            case 3:
+                return notePrefab3;
+            // case 4:
+            //     return notePrefab4;
+            // case 5:
+            //     return notePrefab5;
+            // case 6:
+            //     return notePrefab6;
+            // case 7:
+            //     return notePrefab7;
+            default:
+                return notePrefab1;
+            
         }
     }
     private void PushColouredRibbon(int ribbonCount)
     {   
         if(UIO.GetIsVisible())
         {
-            GameObject colouredRibbon = ObjectPool.Instance.GetObject(colouredRibbonPrefab);
+            GameObject colouredRibbon = ObjectPool.Instance.GetObject(RollColouredRibbon());
             colouredRibbon.transform.position = ribbonBornPoint.position;
             colouredRibbon.transform.SetParent(transform.parent , true);
             for(int i = ribbonCount - 1 ; i > 0 ; i --)
             {
-                colouredRibbon = ObjectPool.Instance.GetObject(colouredRibbonPrefab);
+                colouredRibbon = ObjectPool.Instance.GetObject(RollColouredRibbon());
                 colouredRibbon.transform.position = ribbonBornPoint.position;
                 // colouredRibbon.transform.parent = transform.parent;
                 colouredRibbon.transform.SetParent(transform.parent , true);
@@ -218,20 +254,37 @@ public class DancePlayer : MonoBehaviour
         else
         {
             Color inVisibleColor = UIO.GetInVisibleColor();
-            GameObject colouredRibbon = ObjectPool.Instance.GetObject(colouredRibbonPrefab);
+            GameObject colouredRibbon = ObjectPool.Instance.GetObject(RollColouredRibbon());
             colouredRibbon.transform.position = ribbonBornPoint.position;
             colouredRibbon.transform.SetParent(transform.parent , true);
             colouredRibbon.GetComponent<Image>().color = inVisibleColor;
             for(int i = ribbonCount - 1 ; i > 0 ; i --)
             {
-                colouredRibbon = ObjectPool.Instance.GetObject(colouredRibbonPrefab);
+                colouredRibbon = ObjectPool.Instance.GetObject(RollColouredRibbon());
                 colouredRibbon.transform.position = ribbonBornPoint.position;
                 // colouredRibbon.transform.parent = transform.parent;
                 colouredRibbon.transform.SetParent(transform.parent , true);
                 colouredRibbon.GetComponent<Image>().color = inVisibleColor;
             }
         }
+        
     }
+    private GameObject RollColouredRibbon()
+    {
+        switch(Random.Range(1 , 4))
+        {
+            case 1:
+                return colouredRibbonPrefab1;
+            case 2:
+                return colouredRibbonPrefab2;
+            case 3:
+                return colouredRibbonPrefab3;
+            default:
+                return colouredRibbonPrefab1;
+            
+        }
+    }
+
     public void SetVisible()
     {
         isVisible = true;
@@ -243,6 +296,20 @@ public class DancePlayer : MonoBehaviour
     public void SetNowBCount(float bpm)
     {
         nowBCount = bpm;
+    }
+    public void SetNowDanceActCount(float BCount)
+    {
+        nowBCount = BCount;
+        nowDanceActCount = 0;
+        for (int i = isActDone.Length - 1; i >= 0; i--)
+        {
+            isActDone[i] = false;
+        }
+        while(danceActionBPMCount[nowDanceActCount] < BCount)
+        {
+            isActDone[nowDanceActCount] = true;
+            nowDanceActCount ++ ;
+        }
     }
 
 }

@@ -1,0 +1,20 @@
+{
+    "savedata": {
+        "longmenCoin": 980,
+        "isCharacter1Unlock": true,
+        "isCharacter2Unlock": false,
+        "isSkill1Unlock": false,
+        "isSkill2Unlock": false,
+        "isSkill3Unlock": false,
+        "isEnemy1Unlock": false,
+        "isEnemy2Unlock": false,
+        "isEnemy3Unlock": false,
+        "isBossVeyronUnlock": false
+    },
+    "playHistorydata": {
+        "playEndCount": 0,
+        "enemyHasBeat": 0,
+        "BossHasBeat": 0,
+        "highestScore": 660
+    }
+}

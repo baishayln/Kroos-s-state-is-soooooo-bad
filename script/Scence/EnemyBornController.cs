@@ -9,6 +9,8 @@ public class EnemyBornController : MonoBehaviour
     [SerializeField]public GameObject UAV;
     [SerializeField]public GameObject enemy3;
     [SerializeField]public GameObject Varon;
+    [SerializeField]public GameObject sponsoredUVA;
+    [SerializeField]public GameObject[] enemys;
     private int enemyCount = 0;
     private float enemyBornTimer = 0;
     [SerializeField]public float enemyBornColdTime = 0.25f;
@@ -28,7 +30,6 @@ public class EnemyBornController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        nowWave = 1;
     }
 
     // Update is called once per frame
@@ -38,78 +39,26 @@ public class EnemyBornController : MonoBehaviour
     }
     void FixedUpdate()
     {
-        // IsEnemyBorn();
-        if (!isStopBornEnemy)
-        {
-            enemyBornTimer += Time.deltaTime;
-            if(enemyBornTimer >= enemyBornColdTime)
-            {
-                enemyBornTimer = 0;
-                IsEnemyBorn();
-            }
-        }
-        if (relaxTimer > 0 && !isEndFight)
-        {
-            if (relaxTimer <= Time.deltaTime)
-            {
-                nowWave ++ ;
-                transform.GetComponent<FightUIController>().WaveStart(nowWave);
-                // Debug.Log(nowWave);
-            }
-            relaxTimer -= Time.deltaTime;
-        }
+        // ContinuouslyGenerateEnemy();
     }
     //需要一个函数用来控制当前每一帧的生成几率
     //需要一个函数来判断当前是否继续生成怪物
     //波次结束有两种方式，一种是时间归零，一种是杀够数量（很多？300？）
     //需要一个boss脚本
-    public void BornEnemy()             //生成敌人时会调用此函数，并且在UI上显示当前敌人数量？此函数暴露给敌人生成器脚本或者敌人使用
+
+    public void BornAllEnemy(float time)
     {
-        enemyCount++;                     //敌人生成脚本应该动态平衡，敌人少时增多，敌人多时减少生成，有一个生成概率每帧有一定概率生成
-        // SetEnemy();
+        StartCoroutine(BornAllEnemyIE(time));
     }
-    public void EnemyDeath()            //敌人死亡或离开屏幕时调用，当前场景内敌人计数减一
+    IEnumerator BornAllEnemyIE(float time)
     {
-        enemyCount -- ;
-        if (enemyCount < 0)
+        if (GameController.Instance.GetSsponsoredUVACount() > 0)
         {
-            enemyCount = 0;
+            yield return StartCoroutine(GenerateEnemiesIE(sponsoredUVA , GameController.Instance.GetSsponsoredUVACount() , 1.5f));
+            yield return new WaitForSeconds(time);
         }
-    }
-    public void EnemyLoss()
-    {
-        enemyCount -- ;
-        if (enemyCount < 0)
-        {
-            enemyCount = 0;
-        }
-    }
-    private void IsEnemyBorn()          //此函数每帧或每fixedupdate调用，根据当前场上怪物数量计算这一帧有多少概率生成怪物
-    {
-        // int x = Random.Range(-1000 , 21);
-        // if(x > enemyCount)        //需要修改一下生成判定算法
-        // {
-        //     BornEnemy();
-        //     Debug.Log("随机数为：" + x + "敌人数量：" + enemyCount);
-        // }
-        if(normalEnemyCount - enemyCount >= 0)
-        {
-            extraEnemyBornProbability = 100/normalEnemyCount * (normalEnemyCount - enemyCount);
-        }
-        if((Random.Range(0 , 100) < basicEnemyBornProbability + extraEnemyBornProbability || enemytIsNotBornIntervalCount >= enemyBornMaxIntervalCount) && enemyBornIntervalCount <= 0)        //需要修改一下生成判定算法
-        {
-            BornEnemy();
-            SetEnemy();
-            if(enemytIsNotBornIntervalCount >= enemyBornMaxIntervalCount)
-                {enemytIsNotBornIntervalCount = 0;}
-            enemyBornIntervalCount = enemyBornMinIntervalCount;
-            enemytIsNotBornIntervalCount = 0;
-        }
-        else
-        {
-            // enemytIsNotBornIntervalCount ++; 
-            enemyBornIntervalCount --;
-        }
+        yield return StartCoroutine(GenerateBossAfterTimeIE(Varon , 3));
+        GameController.Instance.ResetSponsoredUVACount();
     }
     private void SetEnemy()
     {
@@ -123,21 +72,35 @@ public class EnemyBornController : MonoBehaviour
             newEnemy1.GetComponent<EnemyBehavior>().SetBornPosition(CameraBehaviour.Instance.ReturnBornPosition());
         }
     }
+    private void SetEnemy(GameObject obj)
+    {
+        transform.GetComponent<FightUIController>().BornEnemy();
+        GameObject newEnemy = ObjectPool.Instance.GetObject(obj);
+        newEnemy.transform.SetParent(null);
+        if(!newEnemy.GetComponent<EnemyBehavior>().SetBornPosition(CameraBehaviour.Instance.ReturnBornPosition()))
+        {
+            GameObject newEnemy1 = ObjectPool.Instance.GetObject(UAV);
+            newEnemy1.transform.SetParent(null);
+            newEnemy1.GetComponent<EnemyBehavior>().SetBornPosition(CameraBehaviour.Instance.ReturnBornPosition());
+        }
+    }
+    private void SetBoss(GameObject obj)
+    {
+        transform.GetComponent<FightUIController>().BornEnemy();
+        GameObject newEnemy = ObjectPool.Instance.GetObject(obj);
+        newEnemy.transform.SetParent(null);
+        GameController.Instance.SetBossInGame(newEnemy);
+        newEnemy.GetComponent<BossBorn>().SetBornPosition(CameraBehaviour.Instance.ReturnBornPosition());
+        newEnemy.GetComponent<BossBorn>().SetBossHealthBar(transform.GetComponent<FightUIController>().GetHealthBar());
+        // transform.GetComponent<FightUIController>().HealthBarBorn();
+    }
     private GameObject RandomEnemy()
     {
-        switch (Random.Range(0 , 2))
-        {
-            case 0:
-                return CommonWorm;
-            case 1:
-                return UAV;
-            case 2:
-                return enemy3;
-            case 999:
-                return Varon;
-            default:
-                return CommonWorm;
-        }
+       return ObjectPool.Instance.GetObject(enemys[Random.Range(0 , enemys.Length)]);
+    }
+    public void EnemyBorn(GameObject obj)
+    {
+        ObjectPool.Instance.GetObject(obj);
     }
     public void PauseBornEnemy()
     {
@@ -147,12 +110,6 @@ public class EnemyBornController : MonoBehaviour
     {
         isStopBornEnemy = false;
     }
-    public void StopBornEnemy()
-    {
-        enemyCount = 0;
-        isStopBornEnemy = true;
-        relaxTimer = relaxTimeBetweenWaves;
-    }
     public void StartBornEnemy()
     {
         isStopBornEnemy = false;
@@ -160,5 +117,57 @@ public class EnemyBornController : MonoBehaviour
     public void EndFight()
     {
         isEndFight = true;
+    }
+    public void GenerateEnemies(GameObject enemy , int enemynum , float interval)
+    {
+        StartCoroutine(GenerateEnemiesIE(enemy , enemynum , interval));
+    }
+    public void GenerateEnemyAfterTime(GameObject enemy , float waitTime)
+    {
+        StartCoroutine(GenerateEnemyAfterTimeIE(enemy , waitTime));
+    }
+    public void GenerateBossAfterTime(GameObject enemy , float waitTime)
+    {
+        StartCoroutine(GenerateBossAfterTimeIE(enemy , waitTime));
+    }
+    private void ContinuouslyGenerateEnemy()
+    {
+        if (!isStopBornEnemy)
+        {
+            enemyBornTimer += Time.deltaTime;
+            if(enemyBornTimer >= enemyBornColdTime)
+            {
+                enemyBornTimer = 0;
+                // IsEnemyBorn();
+            }
+        }
+        if (relaxTimer > 0 && !isEndFight)
+        {
+            if (relaxTimer <= Time.deltaTime)
+            {
+                nowWave ++ ;
+                transform.GetComponent<FightUIController>().WaveStart(nowWave);
+                // Debug.Log(nowWave);
+            }
+            relaxTimer -= Time.deltaTime;
+        }
+    }
+    IEnumerator GenerateEnemiesIE(GameObject enemy , int enemynum , float interval)
+    {
+        for (int i = 0; i < enemynum; i++)
+        {
+            SetEnemy(enemy);
+            yield return new WaitForSeconds(interval);
+        }
+    }
+    IEnumerator GenerateEnemyAfterTimeIE(GameObject enemy , float waitTime)
+    {
+        yield return new WaitForSeconds(waitTime);
+        SetEnemy(enemy);
+    }
+    IEnumerator GenerateBossAfterTimeIE(GameObject enemy , float waitTime)
+    {
+        yield return new WaitForSeconds(waitTime);
+        SetBoss(enemy);
     }
 }

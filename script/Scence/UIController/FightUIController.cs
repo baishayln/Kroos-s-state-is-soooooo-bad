@@ -52,17 +52,20 @@ public class FightUIController : MonoBehaviour
     private Text enemyKill;
     private int[] enemyKillInWaves = new int[3];
     private int totleScore;
+    private int longmenCoinGet;
     private bool isEndFight = false;
     private int totleEnemyKillCount;
+    private float missionComplitePersent;
     [SerializeField]public Text totleEnemyKillCountText;
     [SerializeField]public Text totleScoreText;
     private bool isPause = false;
+    [SerializeField]private AudioClip pauseEffect;
     private GameObject setting;
     [SerializeField]private AudioClip uiEffect;
     [SerializeField]private AudioClip BGM;
     [SerializeField]private float level;
     [SerializeField]private float scoreGet = 1;
-    [SerializeField]private float neutralBuffProbablity = 50;
+    [SerializeField]private float neutralBuffProbablity = 34;
     [SerializeField]private float getSkillProbablity = 34;
     [SerializeField]private int debuffCount = 2;
     [SerializeField]private Text fightEndVoice;
@@ -72,10 +75,23 @@ public class FightUIController : MonoBehaviour
     [SerializeField]public Slider loadSlider;
     [SerializeField]public Text loadingText;
     [SerializeField]public GameObject loadScreen;
+    [SerializeField]public Sprite pauseButtonSprite;
+    [SerializeField]public Sprite playButtonSprite;
+    [SerializeField]public Image pauseButton;
+    private float gameTime = 0;
+    private bool isGameTiming = false;
+    private int UVAcount;
+    [SerializeField]private float BornEnemyWaitTime = 15;
+    [SerializeField]public GameObject BossHealthBar;
+    [SerializeField]private bool isTest = false;
+    [SerializeField]public GameObject testObj;
+    private bool isEndShow;
+    private float scoreMut = 1;
     
     // Start is called before the first frame update
     void Start()
     {
+        GlobleDamageCounter.Instance.ResetDamage();
         Skill1Image = transform.GetChild(1).GetComponent<Image>();
         Skill2Image = transform.GetChild(0).GetComponent<Image>();
         SkillCold1 = Skill1Image.transform.GetChild(0).GetComponent<Image>();
@@ -86,34 +102,33 @@ public class FightUIController : MonoBehaviour
         buffDescribe = transform.GetChild(2).GetChild(1).GetComponent<Text>();
         animator = transform.GetComponent<Animator>();
         startInfo = animator.GetCurrentAnimatorStateInfo(0);
+        if (!pauseButton)
+        {
+            pauseButton = transform.GetChild(8).gameObject.GetComponent<Image>();
+        }
 
         healthBar = transform.GetChild(3).gameObject;
         healthText = healthBar.transform.GetChild(3).gameObject.GetComponent<Text>();
 
-        enemyKill = transform.GetChild(5).gameObject.GetComponent<Text>();
-        enemyKill.text = "本轮击败敌人：" + enemyDeathInNowWave;
+        // enemyKill = transform.GetChild(5).gameObject.GetComponent<Text>();
+        // enemyKill.text = "本轮击败敌人：" + enemyDeathInNowWave;
 
         setting = transform.GetChild(6).gameObject;
 
-        player = GameObject.Find("Player");
-
-        Skill1Image.sprite = player.GetComponent<PlayerShoot>().GetSkillSprite(0);
-        Skill2Image.sprite = player.GetComponent<PlayerShoot>().GetSkillSprite(1);
-
-        startDebuffTypeDir.Add(StartDeBuff.AttackDown , "神经退行！");
-        startDebuffDescribeDir.Add(StartDeBuff.AttackDown , "克洛丝与凯尔希一起潜入深海营救沉迷烤海嗣的博士，却在行动过程中被不幸投出了1的屑博士献祭了，人神共愤！/n克洛丝的攻击被降低了，效果拔群！");
+        startDebuffTypeDir.Add(StartDeBuff.AttackDown , "血肉畸变！");
+        startDebuffDescribeDir.Add(StartDeBuff.AttackDown , "克洛丝与凯尔希一起潜入深海营救沉迷烤海嗣的博士，却在行动过程中被不幸投出了1的屑博士献祭了，人神共愤！\n\n克洛丝的攻击被降低了，效果拔群！");
         startDebuffColor.Add(StartDeBuff.AttackDown , new Color(196f/255 , 39f/255 , 212f/255 , 255f/255));//紫色
 
         startDebuffTypeDir.Add(StartDeBuff.IntervalDown , "睡眠不足！");
-        startDebuffDescribeDir.Add(StartDeBuff.IntervalDown , "昨晚克洛丝和博士被博士拖着在办公室玩游戏玩了个爽，今天早上还要参加行动，这让本就不足的睡眠雪上加霜！/n克洛丝，你为什么只是看着！/n攻击间隔增大！");
+        startDebuffDescribeDir.Add(StartDeBuff.IntervalDown , "昨晚克洛丝和博士被博士拖着在办公室玩游戏玩了个爽，今天早上还要参加行动，这让本就不足的睡眠雪上加霜！\n\n克洛丝，你为什么只是看着！\n攻击间隔增大！");
         startDebuffColor.Add(StartDeBuff.IntervalDown , new Color(154f/255 , 46f/255 , 81f/255 , 255f/255));//粉色
 
-        startDebuffTypeDir.Add(StartDeBuff.ScatterDown , "特朗哺临综合征！");
-        startDebuffDescribeDir.Add(StartDeBuff.ScatterDown , "“我到河北省来，I like河北省的书呆子……好棒，好棒的……！”昨晚罗德岛有凶恶博士出没压榨员工，克洛丝今天的手有点哆哆嗦嗦的！/n什么嘛……我射的还是蛮准的吗……/n攻击散射增大！");
+        startDebuffTypeDir.Add(StartDeBuff.ScatterDown , "物理神经损伤！");
+        startDebuffDescribeDir.Add(StartDeBuff.ScatterDown , "昨晚罗德岛有凶恶博士出没压榨员工，克洛丝今天的手有点哆哆嗦嗦的！\n\n什么嘛……我射的还是蛮准的吗……\n攻击散射增大！");
         startDebuffColor.Add(StartDeBuff.ScatterDown , Color.black);//黑色
 
         startDebuffTypeDir.Add(StartDeBuff.RangeDown , "武器校准过度！");
-        startDebuffDescribeDir.Add(StartDeBuff.RangeDown , "“我的、我的王之力啊！！！！！”——可露希尔在校准武器时由于操作不规范而大喊道。/n发生这种事情大家都不想的~武器射程下降！");
+        startDebuffDescribeDir.Add(StartDeBuff.RangeDown , "“我的、我的王之力啊！！！！！”——可露希尔在校准武器时由于操作不规范而大喊道。\n\n发生这种事情大家都不想的~武器射程下降！");
         startDebuffColor.Add(StartDeBuff.RangeDown , Color.yellow);//黄色
 
         startDebuffTypeDir.Add(StartDeBuff.CantStopShoot , "达瓦里希！伏特加！");
@@ -131,6 +146,10 @@ public class FightUIController : MonoBehaviour
         startDebuffTypeDir.Add(StartDeBuff.tnnd , "闪开！我来！");
         startDebuffDescribeDir.Add(StartDeBuff.tnnd , "他奶奶的，姑奶奶来了！");
         startDebuffColor.Add(StartDeBuff.tnnd , Color.green);//绿色
+
+        startDebuffTypeDir.Add(StartDeBuff.FishRocket , "这不是很好吃吗！");
+        startDebuffDescribeDir.Add(StartDeBuff.FishRocket , "博士曾经说过，夏天吃鲱鱼罐头就像是凌晨四点在厕所吃泡面，回味无穷又震慑人心。");
+        startDebuffColor.Add(StartDeBuff.FishRocket , new Color(181/255 , 115/255 , 0/255 , 255f/255));//屎黄色
         //有内鬼，终止交易！
         //五年，五年！你知道我这五年怎么过的吗！
         //克洛丝！你在干什么啊克洛丝！
@@ -145,6 +164,24 @@ public class FightUIController : MonoBehaviour
         //达瓦里希，伏特加！我！控！几！不！住！我！吉！几！    //无法停止射击？
         // startDebuffType.Add(StartDeBuff , "");
         // startDebuffDescribe.Add(StartDeBuff);
+
+
+        if (GameController.Instance && GameController.Instance.GetCharacter())
+        {
+            GameObject.Instantiate(GameController.Instance.GetCharacter() , GameObject.Find("PlayerBornPoint").transform.position , Quaternion.identity).name = "Player";
+            // ObjectPool.Instance.GetObject(PlayerCharacterController.Instance.GetCharacter()).transform.position = GameObject.Find("PlayerBornPoint").transform.position;
+        }
+
+        player = GameObject.Find("Player");
+
+        // Skill1Image.sprite = player.GetComponent<PlayerShoot>().GetSkillSprite(0);
+        // Skill2Image.sprite = player.GetComponent<PlayerShoot>().GetSkillSprite(1);
+    }
+    void OnEnable()
+    {
+        GlobleDamageCounter.Instance.ResetDamage();
+        ObjectPool.Instance.ClearQueue();
+        isEndShow = false;
     }
 
     // Update is called once per frame
@@ -164,16 +201,6 @@ public class FightUIController : MonoBehaviour
                 StartCoroutine(GameStart());
             }
         }
-        // if(isPreparationStart && !isFightStart)
-        // {
-        //     gameStartTimer += Time.deltaTime;
-        //     if(gameStartTimer > startTime)
-        //     {
-        //         isFightStart = true;
-        //         gameStartTimer = 0;
-        //         // FightStart();
-        //     }
-        // }
         if (nowWaveTime < nowWaveTimeAtLeast + 1 && isInWave)
         {
             nowWaveTime += Time.deltaTime;
@@ -181,34 +208,20 @@ public class FightUIController : MonoBehaviour
         if (nowWaveTime > nowWaveTimeAtLeast + 1 && enemyDeathInNowWave >= nowWaveEnemyKillAtLeast && isInWave)
         {
             EndWaves();
-            // Debug.Log("达成波次条件");
         }
-        // BornEnemy();
         if(!isEndFight && Input.GetKeyDown(KeyCode.Escape))
         {
-            // isPause = !isPause;
-            // setting.SetActive(isPause);
-            if (isPause)
-            {
-                Time.timeScale = 1;
-                isPause = !isPause;
-                setting.SetActive(isPause);
-            }
-            else
-            {
-                Time.timeScale = 0;
-                isPause = !isPause;
-                setting.SetActive(isPause);
-            }
+            Pause();
+        }
+        if (isGameTiming)
+        {
+            gameTime += Time.deltaTime;
+        }
+        if(Input.GetKeyDown(KeyCode.L) && isTest)
+        {
+            ObjectPool.Instance.GetObject(testObj);
         }
     }
-    public void ReturnGame()
-    {
-        setting.SetActive(false);
-        isPause = !isPause;
-        Time.timeScale = 1;
-    }
-
     void FixedUpdate()
     {
         if(skillColdTimer >= 0)
@@ -217,6 +230,40 @@ public class FightUIController : MonoBehaviour
         }
     }
 
+    public void Pause()
+    {
+        if (isPause)
+        {
+            Time.timeScale = 1;
+            isPause = !isPause;
+            setting.SetActive(isPause);
+            pauseButton.sprite = pauseButtonSprite;
+        }
+        else
+        {
+            Time.timeScale = 0;
+            isPause = !isPause;
+            setting.SetActive(isPause);
+            pauseButton.sprite = playButtonSprite;
+        }
+        player.GetComponent<PlayerMove>().PauseGame(!isPause);
+        player.GetComponent<PlayerShoot>().PauseGame(!isPause);     //当isPause为true时，玩家无法射击，游戏运行速度为0，显示暂停提示框
+        SoundManager.Instance.PlayEffectSound(pauseEffect);
+    }
+    public void ReturnGame()
+    {
+        Pause();
+    }
+    public void StartTiming()
+    {
+        isGameTiming = true;
+    }
+    public void StopTiming()
+    {
+        isGameTiming = false;
+    }
+
+    
     //需要一个公开函数用来切换技能图标，播放两个技能图图标的动画和切换图标
     public void ChangeSkill()
     {
@@ -286,8 +333,10 @@ public class FightUIController : MonoBehaviour
     }
     IEnumerator GameStart()
     {
+        PlayBGM();
         transform.GetComponent<EnemyBornController>().PauseBornEnemy();
-        playersDebuffs = player.GetComponent<PlayerShoot>().GiveDebuffs(debuffCount);
+        // playersDebuffs = player.GetComponent<PlayerShoot>().GiveDebuffs(debuffCount);
+        playersDebuffs = player.GetComponent<PlayerShoot>().GiveDebuffs(GameController.Instance.GetKroossState());
         if (Random.Range(0 , 100) < neutralBuffProbablity)
         {
             StartDeBuff[] sttDebuffs = playersDebuffs;
@@ -338,7 +387,10 @@ public class FightUIController : MonoBehaviour
             yield return StartCoroutine(IsAnimatorEnd());
         }
         
-        transform.GetComponent<EnemyBornController>().ContinueBornEnemy();
+        // transform.GetComponent<EnemyBornController>().ContinueBornEnemy();
+        StartTiming();
+        transform.GetComponent<EnemyBornController>().BornAllEnemy(BornEnemyWaitTime);
+        // transform.GetComponent<EnemyBornController>().GenerateBossAfterTime(GameController.Instance.GetBoss() , 3);
     }
     IEnumerator IsAnimatorEnd()
     {
@@ -356,6 +408,7 @@ public class FightUIController : MonoBehaviour
     //         GetBuffContent(playersDebuffs[i]);
     //     }
     // }
+    
     public void GetBuffContent(StartDeBuff type)
     {
         buffName.text = startDebuffTypeDir[type];
@@ -384,9 +437,11 @@ public class FightUIController : MonoBehaviour
     {
         fightEndVoice.text = "呜....搞砸了....";
         kroosFace.sprite = gameoverImage;
-        transform.GetComponent<EnemyBornController>().StopBornEnemy();
+        // transform.GetComponent<EnemyBornController>().StopBornEnemy();
         EndFight();
         transform.GetComponent<EnemyBornController>().EndFight();
+        // ArchiveSystem.Instance.GameOver(Mathf.FloorToInt((enemyKillInWaves[0] * 1 + enemyKillInWaves[1] * 1.5f + enemyKillInWaves[2] * 2) * scoreGet * 0.5f) , Mathf.FloorToInt((enemyKillInWaves[0] * 1 + enemyKillInWaves[1] * 1.5f + enemyKillInWaves[2] * 2) * scoreGet));
+        ArchiveSystem.Instance.GameOver(Mathf.FloorToInt(GlobleDamageCounter.Instance.GetDamage() * 0.5f) , Mathf.FloorToInt(GlobleDamageCounter.Instance.GetDamage()));
     }
     private void SettlementScreen()      //游戏结束时显示结算界面，开始计算分数
     {
@@ -409,7 +464,7 @@ public class FightUIController : MonoBehaviour
     {
         enemyCount -- ;
         enemyDeathInNowWave ++ ;
-        enemyKill.text = "本轮击败敌人：" + enemyDeathInNowWave;
+        // enemyKill.text = "本轮击败敌人：" + enemyDeathInNowWave;
     }
     public void EnemyLoss()
     {
@@ -426,7 +481,7 @@ public class FightUIController : MonoBehaviour
         }
         enemyDeathInNowWave = 0;
         nowWaveTime = 0;
-        enemyKill.text = "本轮击败敌人：" + enemyDeathInNowWave;
+        // enemyKill.text = "本轮击败敌人：" + enemyDeathInNowWave;
         transform.GetComponent<EnemyBornController>().StartBornEnemy();
     }
     public int EnemyNumNow()
@@ -441,13 +496,15 @@ public class FightUIController : MonoBehaviour
     {
         isInWave = false;
         numOfRewardOfNowWave = 0;
-        transform.GetComponent<EnemyBornController>().StopBornEnemy();
+        // transform.GetComponent<EnemyBornController>().StopBornEnemy();
         if (nowWave == 3)
         {
             fightEndVoice.text = "我觉得还可以哦！";
             kroosFace.sprite = gameEndImage;
             EndFight();
             transform.GetComponent<EnemyBornController>().EndFight();
+            // ArchiveSystem.Instance.GameEnd(Mathf.FloorToInt((enemyKillInWaves[0] * 1 + enemyKillInWaves[1] * 1.5f + enemyKillInWaves[2] * 2) * scoreGet * 0.5f) , Mathf.FloorToInt((enemyKillInWaves[0] * 1 + enemyKillInWaves[1] * 1.5f + enemyKillInWaves[2] * 2) * scoreGet));
+            ArchiveSystem.Instance.GameEnd(Mathf.FloorToInt(GlobleDamageCounter.Instance.GetDamage() * 0.5f + 500 * (90f/gameTime)) , Mathf.FloorToInt(GlobleDamageCounter.Instance.GetDamage() + 1000 * 180f/gameTime));
         }
     }
     public float GetSkillCold()
@@ -474,6 +531,23 @@ public class FightUIController : MonoBehaviour
         healthText.text = health + "/" + healthLimit;
         healthBar.GetComponent<Slider>().value = health / healthLimit;
         return health/healthLimit;
+    }
+    public void HealthBarBorn()
+    {
+        StartCoroutine(HealthBarBornIE());
+    }
+    IEnumerator HealthBarBornIE()
+    {
+        Color color = healthBar.transform.GetChild(3).GetComponent<Text>().color;
+        color.a = 0;
+        while(color.a < 1)
+        {
+            yield return new WaitForFixedUpdate();
+            color.a += Time.deltaTime;
+            healthBar.transform.GetChild(3).GetComponent<Text>().color = color;
+        }
+        
+
     }
     private void EndFight()
     {
@@ -504,7 +578,6 @@ public class FightUIController : MonoBehaviour
             
         //     if(allObj[i - 1].CompareTag("Enemy"))
         //     {
-        //         Debug.Log(allObj[i - 1]);
         //         ObjectPool.Instance.PushObject(allObj[i - 1]);
         //     }
         // }
@@ -518,10 +591,8 @@ public class FightUIController : MonoBehaviour
     }
     public void PlayBGM()
     {
-        if (BGM)
-        {
-            SoundManager.Instance.PlayEffectSound(BGM);
-        }
+        SoundManager.Instance.PlayBGM2();
+        SoundManager.Instance.ContinueMusicSound();
     }
     public void PausePlayAnimator()
     {
@@ -531,11 +602,87 @@ public class FightUIController : MonoBehaviour
     {
         animator.speed = 1f;
     }
+    
+    private void BornAllEnemy()
+    {
+        transform.GetComponent<EnemyBornController>().BornAllEnemy(BornEnemyWaitTime);
+    }
     IEnumerator ShowScore()
     {
+        
         float timeOfRollScore = 1;
-        totleEnemyKillCount = enemyKillInWaves[0] + enemyKillInWaves[1] + enemyKillInWaves[2];
-        totleScore = Mathf.FloorToInt((enemyKillInWaves[0] * 2 + enemyKillInWaves[1] * 1.5f + enemyKillInWaves[2] * 1) * scoreGet);
+        string extraString;
+        string extraString2;
+        if (GameController.Instance.GetKroossState() == 0)
+        {
+            scoreMut = 1;
+        }
+        else if (GameController.Instance.GetKroossState() == 1)
+        {
+            scoreMut = 1.3f;
+        }
+        else if (GameController.Instance.GetKroossState() == 2)
+        {
+            scoreMut = 1.5f;
+        }
+        else
+        {
+            scoreMut = 1;
+        }
+        // totleEnemyKillCount = enemyKillInWaves[0] + enemyKillInWaves[1] + enemyKillInWaves[2];
+        // totleScore = Mathf.FloorToInt((enemyKillInWaves[0] * 1 + enemyKillInWaves[1] * 1.5f + enemyKillInWaves[2] * 2) * scoreGet);
+
+
+        missionComplitePersent = 100 * (1 - (GameController.Instance.GetBossInGame().GetComponent<OnHit>().GetHealth() / GameController.Instance.GetBossInGame().GetComponent<OnHit>().GetHealthUplimit()));
+        // ArchiveSystem.Instance.GameOver(Mathf.FloorToInt(GlobleDamageCounter.Instance.GetDamage() * 0.5f) , Mathf.FloorToInt(GlobleDamageCounter.Instance.GetDamage()));
+        if (missionComplitePersent > 100)
+        {
+            missionComplitePersent = 100;
+        }
+
+        if (GameController.Instance.GetBossInGame().GetComponent<OnHit>().GetHealth() / GameController.Instance.GetBossInGame().GetComponent<OnHit>().GetHealthUplimit() > 0)
+        {
+            extraString = "%    任务将由专业小队收尾。";
+        }
+        else
+        {
+            extraString = "%    克洛丝的工作完成了，但博士还没有。";
+        }
+
+        if (GameController.Instance.GetBossInGame().GetComponent<OnHit>().GetHealth() / GameController.Instance.GetBossInGame().GetComponent<OnHit>().GetHealthUplimit() > 0)
+        {
+            totleScore = Mathf.FloorToInt(GlobleDamageCounter.Instance.GetDamage() * scoreMut);
+        }
+        else
+        {
+            totleScore = Mathf.FloorToInt(GlobleDamageCounter.Instance.GetDamage() + 500 * (90f/gameTime) * scoreMut);
+        }
+
+        if(missionComplitePersent/100 >= 1 && totleScore - GameController.Instance.GetBossInGame().GetComponent<OnHit>().GetHealthUplimit() > 500)
+        {
+            extraString2 = "    S！  迅捷又快速，好用又强力！这就是克洛丝给我的自信！";
+        }
+        else if (missionComplitePersent/100 >= 1)
+        {
+            extraString2 = "    A    克洛丝圆满完成了任务！";
+        }
+        else if(missionComplitePersent/100 > 0.75f)
+        {
+            extraString2 = "    B    只要到达那个地方……";
+        }
+        else if(missionComplitePersent/100 > 0.4f)
+        {
+            extraString2 = "    C    也许，克洛丝还能加加油？";
+        }
+        else if(missionComplitePersent/100 > 0.2f)
+        {
+            extraString2 = "    D    博士，又在打电动噢，休息一下好不好？";
+        }
+        else
+        {
+            extraString2 = "    D    也许半夜吃泡面真的有害于健康，博士。";
+        }
+
         totleEnemyKillCountText.text = 0.ToString();
         totleScoreText.text = 0.ToString();
         while(timeOfRollScore > 0)
@@ -544,7 +691,8 @@ public class FightUIController : MonoBehaviour
             timeOfRollScore -= Time.deltaTime;
             yield return null;
         }
-        totleEnemyKillCountText.text = totleEnemyKillCount.ToString();
+        // totleEnemyKillCountText.text = totleEnemyKillCount.ToString() + extraString;
+        totleEnemyKillCountText.text = missionComplitePersent.ToString("F2") + extraString;
         yield return new WaitForSeconds(1);
         timeOfRollScore = 1;
         while(timeOfRollScore > 0)
@@ -553,7 +701,10 @@ public class FightUIController : MonoBehaviour
             timeOfRollScore -= Time.deltaTime;
             yield return null;
         }
-        totleScoreText.text = totleScore.ToString();
+        // totleScoreText.text = totleScore.ToString();
+        totleScoreText.text = totleScore.ToString() + extraString2;
+        isEndShow = true;
+        
     }
     public float GetScoreGet()
     {
@@ -565,12 +716,15 @@ public class FightUIController : MonoBehaviour
     }
     public void ReturnMainMenu()
     {
-        StartCoroutine(LoadScene());
+        if (isEndShow)
+        {
+            StartCoroutine(LoadScene());
+        }
     }
     IEnumerator LoadScene()
     {
         loadScreen.SetActive(true);
-        AsyncOperation operation = SceneManager.LoadSceneAsync(1);
+        AsyncOperation operation = SceneManager.LoadSceneAsync(0);
         operation.allowSceneActivation = false;
         SoundManager.Instance.TurnDownMusic();
         while (!operation.isDone)
@@ -592,5 +746,21 @@ public class FightUIController : MonoBehaviour
             }
             yield return null;
         }
+    }
+    public GameObject GetHealthBar()
+    {
+        return BossHealthBar;
+    }
+    public void End()
+    {
+        ArchiveSystem.Instance.GameEnd(Mathf.FloorToInt(GlobleDamageCounter.Instance.GetDamage() + 500 * (90f/gameTime) * scoreMut) , Mathf.FloorToInt(GlobleDamageCounter.Instance.GetDamage() + 500 * (90f/gameTime) * scoreMut));
+        StartCoroutine(GameEnd());
+    }
+    IEnumerator GameEnd()
+    {
+        yield return new WaitForSeconds(2);
+        
+        EndFight();
+        transform.GetComponent<EnemyBornController>().EndFight();
     }
 }

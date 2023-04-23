@@ -3,7 +3,17 @@ guid: 10619f2121a021f478b774a736300f22
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - animator: {instanceID: 0}
+  - colouredRibbonPrefab: {instanceID: 0}
+  - notePrefab1: {fileID: 3965549499841862136, guid: 3056e412fa02efe4f8021ea6631dbe4c, type: 3}
+  - notePrefab2: {fileID: 5381834741188607294, guid: 7748ada20fe9dc244ab43f9ba781c8d3, type: 3}
+  - notePrefab3: {fileID: 4457553380062000430, guid: f4fa6838726241a4bb6377cc22d5deff, type: 3}
+  - notePrefab4: {fileID: 5381834741188607294, guid: 7748ada20fe9dc244ab43f9ba781c8d3, type: 3}
+  - notePrefab5: {fileID: 5956248090220459160, guid: c257f30fc7e183342849113a9f239293, type: 3}
+  - notePrefab6: {fileID: 4457553380062000430, guid: f4fa6838726241a4bb6377cc22d5deff, type: 3}
+  - notePrefab7: {fileID: 3570317735725291471, guid: 60cfa95025fa11d46bbd0189ace7e0e8, type: 3}
+  - UIO: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

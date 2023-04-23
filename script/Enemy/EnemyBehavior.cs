@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class EnemyBehavior : MonoBehaviour
+public class EnemyBehavior : MonoBehaviour , OnHit
 {
     [SerializeField]public float healthUpLimit = 30;
     protected float nowHealthUpLimit = 30;
@@ -191,46 +191,13 @@ public class EnemyBehavior : MonoBehaviour
                         break;
                 }
             }
-            // switch (Random.Range(0 , 7))
-            // {
-            //     case 0:
-            //         GenerateRewards(Enhancement1);
-            //         break;
-            //     case 1:
-            //         GenerateRewards(Enhancement2);
-            //         break;
-            //     case 2:
-            //         GenerateRewards(Enhancement3);
-            //         break;
-            //     case 3:
-            //         GenerateRewards(Enhancement4);
-            //         break;
-            //     case 4:
-            //         GenerateRewards(Enhancement5);
-            //         break;
-            //     case 5:
-            //         GenerateRewards(Enhancement6);
-            //         break;
-            //     case 6:
-            //         GenerateRewards(Enhancement7);
-            //         break;
-            //     default:
-            //         break;
-            // }
         }
-        // Destroy(gameObject);
-        // SetChildToPool();
         isDead = true;
     }
     private void GenerateRewards(GameObject Enhancement)        //掉落物体并销毁自身
     {
         GameObject playerGenerate = GameObject.Instantiate(Enhancement , transform.position , Quaternion.identity);
         playerGenerate.GetComponent<PlayerEnhancement>().StartMove();
-        // playerGenerate.transform.SetParent(null);
-        // Destroy(gameObject);
-
-        // SetChildToPool();
-        // ObjectPool.Instance.PushObject(gameObject);
     }
     protected void SetChildToPool()
     {
@@ -264,6 +231,7 @@ public class EnemyBehavior : MonoBehaviour
             //  命中时会向后击退，角度有一定的变化
             //  或者就是短暂后退
         health -= damage;
+        DamageCount(damage);
         if(health <= 0)
         {
             Die();
@@ -289,6 +257,7 @@ public class EnemyBehavior : MonoBehaviour
         isEscape = false;
             //  命中时会向后击退，角度有一定的变化
         health -= damage;
+        DamageCount(damage);
         if(health <= 0)
         {
             Die();
@@ -296,6 +265,25 @@ public class EnemyBehavior : MonoBehaviour
         }
         escapeTimer = 0;
         return isDead;
+    }
+    virtual public bool OnHit(float damage)         //当单位受伤死亡后，返回true
+    {
+        health -= damage;
+        DamageCount(damage);
+        if(health <= 0)
+        {
+            Die();
+            // DeadFly(speed);
+        }
+        return isDead;
+    }
+    public float GetHealthUplimit()
+    {
+        return healthUpLimit;
+    }
+    virtual public void DamageCount(float damage)
+    {
+        GlobleDamageCounter.Instance.CauseDamage(damage);
     }
     protected void DeadFly(float hitDir)
     {
@@ -314,7 +302,7 @@ public class EnemyBehavior : MonoBehaviour
         {
             fightUI = GameObject.Find("FightUI");
         }
-        fightUI.GetComponent<EnemyBornController>().EnemyDeath();
+        // fightUI.GetComponent<EnemyBornController>().EnemyDeath();
         fightUI.GetComponent<FightUIController>().EnemyDeath();
     }
     protected void setHealth()
@@ -378,7 +366,7 @@ public class EnemyBehavior : MonoBehaviour
         {
             if (Vector2.Distance(transform.position , objs[i].transform.position) < nearsetEnemyDsts)
             {
-                if (objs[i].transform != transform && objs[i].GetComponent<EnemyBehavior>().GetHealth() > 0)
+                if (objs[i].transform != transform && objs[i].GetComponent<OnHit>().GetHealth() > 0)
                 {
                     nearsetEnemyDsts = Vector2.Distance(transform.position , objs[i].transform.position);
                     nearestEnemy = objs[i].transform;
@@ -387,4 +375,6 @@ public class EnemyBehavior : MonoBehaviour
         }
         return nearestEnemy;
     }
+
+    //还需要一个激活周围所有敌人的函数，自己需要一个警戒bool值，每个单位只进入一次警戒，只发送一次警戒消息
 }

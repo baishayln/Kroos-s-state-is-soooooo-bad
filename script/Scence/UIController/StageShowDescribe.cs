@@ -7,6 +7,7 @@ using UnityEngine.EventSystems;
 public class StageShowDescribe : MonoBehaviour , IPointerEnterHandler, IPointerExitHandler
 {
     [SerializeField]private GameObject describe;
+    [SerializeField]private GameObject isThisUnlock;
     // Start is called before the first frame update
     void Start()
     {
@@ -23,11 +24,29 @@ public class StageShowDescribe : MonoBehaviour , IPointerEnterHandler, IPointerE
     }
     public void OnPointerEnter(PointerEventData eventData)
     {
-        describe.SetActive(true);
+        if (!isThisUnlock)
+        {
+            describe.SetActive(true);
+        }
+        else if (!isThisUnlock.activeInHierarchy)
+        {
+            describe.SetActive(true);
+        }
     }
  
     public void OnPointerExit(PointerEventData eventData)
     {
-        describe.SetActive(false);
+        if (!isThisUnlock)
+        {
+            describe.SetActive(false);
+        }
+        else if (!isThisUnlock.activeInHierarchy)
+        {
+            describe.SetActive(false);
+        }
+    }
+    public GameObject GetDescribe()
+    {
+        return describe;
     }
 }

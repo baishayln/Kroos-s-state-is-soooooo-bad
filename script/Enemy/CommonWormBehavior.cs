@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CommonWormBehavior : EnemyBehavior
+public class CommonWormBehavior : EnemyBehavior , OnHit
 {
     private Vector2 direction;
     private float bornDir;
@@ -201,7 +201,7 @@ public class CommonWormBehavior : EnemyBehavior
     {
         if (other.CompareTag("PlayerBody"))
         {
-            other.transform.parent.GetComponent<PlayerMove>().onHit(attack , other.transform.position.x - transform.position.x);
+            other.transform.parent.GetComponent<OnHit>().OnHit(attack , other.transform.position.x - transform.position.x);
         }
     }
 
@@ -215,7 +215,7 @@ public class CommonWormBehavior : EnemyBehavior
                 SetChildToPool();
                 isDead = true;
                 ObjectPool.Instance.PushObject(gameObject);
-                fightUI.GetComponent<EnemyBornController>().EnemyLoss();
+                // fightUI.GetComponent<EnemyBornController>().EnemyLoss();
                 fightUI.GetComponent<FightUIController>().EnemyLoss();
             }
         }

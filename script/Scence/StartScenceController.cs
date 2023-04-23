@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 
 public enum TypeOfUI
 {
-    StageChoise , MainMenu , Setting , ExitGame
+    StageChoise , MapChoise , CharacterChoise , MainMenu , Setting , ExitGame , SavePage , Record , CharacterIntroduce , EnemyDictionary , BossChoise
 }
 public class StartScenceController : MonoBehaviour
 {
@@ -29,11 +29,25 @@ public class StartScenceController : MonoBehaviour
     [SerializeField]public GameObject mainMenu;
     [SerializeField]public GameObject stageChoise;
     [SerializeField]public GameObject setting;
+    [SerializeField]public GameObject characterChoise;
+    [SerializeField]public GameObject enemyDictionary;
+    [SerializeField]public GameObject characterIntroduce;
+    [SerializeField]public GameObject record;
+    [SerializeField]public GameObject BossChoise;
+    [SerializeField]public GameObject mapChoise;
+
     private bool isShowSetting = false;
     private Color UIColor;
     [SerializeField]private AudioClip uiEffect;
     [SerializeField]private AudioClip BGM;
     [SerializeField]private UIOrnamentController UIOrnamentController;
+    // private int characterNum;
+    private GameObject character;
+    [SerializeField]private GameObject character1;
+    [SerializeField]private GameObject character2;
+    [SerializeField]private GameObject Boss1;
+    [SerializeField]private GameObject Boss2;
+
     //      UI适配部分，被Unity自带功能替换
     // [SerializeField]private float basicScreenX = 811;
     // [SerializeField]private float basicScreenY = 456;
@@ -67,6 +81,8 @@ public class StartScenceController : MonoBehaviour
             stageChoise = transform.GetChild(3).gameObject;
         if(!setting)
             setting = transform.GetChild(4).gameObject;
+        if(!characterChoise)
+            characterChoise = transform.GetChild(5).gameObject;
         
         
         // nowScreenX = basicScreenX;
@@ -86,6 +102,7 @@ public class StartScenceController : MonoBehaviour
     {
         timer = titleShowWaitTime;
         isTitle = false;
+        SoundManager.Instance.PlayBGM1();
     }
     void Update()
     {
@@ -101,80 +118,7 @@ public class StartScenceController : MonoBehaviour
                 animator.Play("StartTitleShow");
             }
         }
-        // if(isChangeUI)
-        // {
-        //     info = animator.GetCurrentAnimatorStateInfo(0);
-        //     if(info.normalizedTime >= 0.98f)
-        //     {
-        //         // animator.Play("");
-        //         // 每一帧里都用代码改变当前UI和UI的子物体的颜色？   //比较复杂，作为一个小项目不太现实，需要遍历，并且开销较大
-        //         nowUI = nextUI;
-        //     }
-        //     // NowUIColorDown();
-        // }
-        // if(isSwitchNextUI)
-        // {
-        //     // NowUIColorUp();
-        // }
     }
-    
-    // IEnumerator NowUIColorDown(GameObject UI)
-    // {
-    //     if(title.GetComponent<Image>())
-    //     {
-    //         UIColor = title.GetComponent<Image>().color;
-    //         title.GetComponent<Image>().color = new Color(UIColor.r , UIColor.g , UIColor.b , UIColor.a - Time.deltaTime);
-    //     }
-    //     if(title.GetComponent<Text>())
-    //     {
-    //         UIColor = title.GetComponent<Image>().color;
-    //         title.GetComponent<Image>().color = new Color(UIColor.r , UIColor.g , UIColor.b , UIColor.a - Time.deltaTime);
-    //     }
-    //     for(int i = 0 ; i < title.transform.childCount ; i++)
-    //     {
-    //         if(title.transform.GetChild(i).GetComponent<Image>())
-    //         {
-    //             UIColor = title.GetComponent<Image>().color;
-    //             title.GetComponent<Image>().color = new Color(UIColor.r , UIColor.g , UIColor.b , UIColor.a - Time.deltaTime);
-    //         }
-    //     }
-    // }
-    // private void NowUIColorDown()
-    // {
-    //     if(nowUI == TypeOfUI.MainMenu)
-    //     {
-    //         if(title.GetComponent<Image>())
-    //         {
-    //             UIColor = title.GetComponent<Image>().color;
-    //             title.GetComponent<Image>().color = new Color(UIColor.r , UIColor.g , UIColor.b , UIColor.a - Time.deltaTime);
-    //         }
-    //         if(title.GetComponent<Text>())
-    //         {
-    //             UIColor = title.GetComponent<Image>().color;
-    //             title.GetComponent<Image>().color = new Color(UIColor.r , UIColor.g , UIColor.b , UIColor.a - Time.deltaTime);
-    //         }
-    //         for(int i = 0 ; i < title.transform.childCount ; i++)
-    //         {
-    //             if(title.transform.GetChild(i).GetComponent<Image>())
-    //             {
-    //                 UIColor = title.GetComponent<Image>().color;
-    //                 title.GetComponent<Image>().color = new Color(UIColor.r , UIColor.g , UIColor.b , UIColor.a - Time.deltaTime);
-    //             }
-    //         }
-    //     }
-    //     if(nowUI == TypeOfUI.StageChoise)
-    //     {
-
-    //     }
-    //     if(nowUI == TypeOfUI.Setting)
-    //     {
-
-    //     }
-    // }
-    // private void NowUIColorUp()
-    // {
-        
-    // }
     public void PlayDong()
     {
         if (uiEffect)
@@ -188,6 +132,7 @@ public class StartScenceController : MonoBehaviour
         // {
         //     SoundManager.Instance.PlayMusicSound(BGM);
         // }
+        SoundManager.Instance.PlayBGM1();
         SoundManager.Instance.ContinueMusicSound();
     }
     public void PlayAudio()
@@ -201,6 +146,40 @@ public class StartScenceController : MonoBehaviour
     public void StageChoiseToTitle()
     {
         
+    }
+    public void ChoiseCharacter(int characterNum)
+    {
+        switch(characterNum)
+        {
+            case 1:
+                // character = character1;
+                GameController.Instance.SetCharacter(character1);
+                break;
+            case 2:
+                // character = character2;
+                GameController.Instance.SetCharacter(character2);
+                break;
+            default:
+                break;
+        }
+    }
+    public void ChoiseBoss(int BossNum)
+    {
+        switch(BossNum)
+        {
+            case 1:
+                // character = character1;
+                GameController.Instance.SetBoss(Boss1);
+                GameController.Instance.SetMapNum(1);
+                break;
+            case 2:
+                // character = character2;
+                GameController.Instance.SetBoss(Boss2);
+                GameController.Instance.SetMapNum(2);
+                break;
+            default:
+                break;
+        }
     }
     public void PublicSwitchUI(int nextUI)
     {
@@ -218,37 +197,42 @@ public class StartScenceController : MonoBehaviour
                 case 3:
                     SwitchUI(TypeOfUI.Setting);
                     break;
+                case 4:
+                    SwitchUI(TypeOfUI.CharacterChoise);
+                    break;
+                case 5:
+                    SwitchUI(TypeOfUI.EnemyDictionary);
+                    break;
+                case 6:
+                    SwitchUI(TypeOfUI.CharacterIntroduce);
+                    break;
+                case 7:
+                    SwitchUI(TypeOfUI.Record);
+                    break;
+                case 8:
+                    SwitchUI(TypeOfUI.BossChoise);
+                    break;
+                case 9:
+                    SwitchUI(TypeOfUI.MapChoise);
+                    break;
                 default:
                     SwitchUI(TypeOfUI.MainMenu);
                     break;
             }
         }
-        //1：初始界面；2：关卡选择界面；3：设置界面；
-        // switch (nextUI)
-        // {
-        //     case 1:
-        //         SwitchUI(TypeOfUI.MainMenu);
-        //         break;
-        //     case 2:
-        //         SwitchUI(TypeOfUI.StageChoise);
-        //         break;
-        //     case 3:
-        //         SwitchUI(TypeOfUI.Setting);
-        //         break;
-        //     default:
-        //         SwitchUI(TypeOfUI.MainMenu);
-        //         break;
-        // }
     }
     private void SwitchUI(TypeOfUI nextUI)
     {
-        // this.nextUI = nextUI;
-        // isChangeUI = true;
-        // isSwitchNextUI = false;
         mainMenu.SetActive(false);
         title.SetActive(false);
         stageChoise.SetActive(false);
         setting.SetActive(false);
+        characterChoise.SetActive(false);
+        record.SetActive(false);
+        characterIntroduce.SetActive(false);
+        enemyDictionary.SetActive(false);
+        BossChoise.SetActive(false);
+        mapChoise.SetActive(false);
         if(nextUI == TypeOfUI.MainMenu)
         {
             mainMenu.SetActive(true);
@@ -259,6 +243,12 @@ public class StartScenceController : MonoBehaviour
         if(nextUI == TypeOfUI.StageChoise)
         {
             stageChoise.SetActive(true);
+            isShowSetting = false;
+            UIOrnamentController.SetInvisible();
+        }
+        if(nextUI == TypeOfUI.CharacterChoise)
+        {
+            characterChoise.SetActive(true);
             isShowSetting = false;
             UIOrnamentController.SetInvisible();
         }
@@ -277,6 +267,58 @@ public class StartScenceController : MonoBehaviour
                 QuitSetting();
             }
         }
+        if(nextUI == TypeOfUI.EnemyDictionary)
+        {
+            enemyDictionary.SetActive(true);
+            UIOrnamentController.SetInvisible();
+        }
+        if(nextUI == TypeOfUI.CharacterIntroduce)
+        {
+            characterIntroduce.SetActive(true);
+            UIOrnamentController.SetInvisible();
+        }
+        if(nextUI == TypeOfUI.Record)
+        {
+            record.SetActive(true);
+            UIOrnamentController.SetInvisible();
+        }
+        if(nextUI == TypeOfUI.BossChoise)
+        {
+            BossChoise.SetActive(true);
+            UIOrnamentController.SetInvisible();
+        }
+        if(nextUI == TypeOfUI.MapChoise)
+        {
+            mapChoise.SetActive(true);
+            UIOrnamentController.SetInvisible();
+        }
+    }
+    public void ReturnToPreviousLevel(GameObject menu)
+    {
+        mainMenu.SetActive(false);
+        title.SetActive(false);
+        stageChoise.SetActive(false);
+        setting.SetActive(false);
+        characterChoise.SetActive(false);
+        record.SetActive(false);
+        characterIntroduce.SetActive(false);
+        enemyDictionary.SetActive(false);
+        
+        menu.SetActive(true);
+    }
+    public void ReturnToMainMenu()
+    {
+        stageChoise.SetActive(false);
+        setting.SetActive(false);
+        characterChoise.SetActive(false);
+        record.SetActive(false);
+        characterIntroduce.SetActive(false);
+        enemyDictionary.SetActive(false);
+
+        mainMenu.SetActive(true);
+        title.SetActive(true);
+        isShowSetting = false;
+        UIOrnamentController.SetVisible();
     }
     public void ShowUIOrnament()
     {
@@ -315,13 +357,23 @@ public class StartScenceController : MonoBehaviour
         canClickButton = true;
         // nowUI = TypeOfUI.MainMenu;
     }
-    public void LoadStage(int stageNum)
+    public void CantClickButton()
+    {
+        canClickButton = false;
+        // nowUI = TypeOfUI.MainMenu;
+    }
+    public void SetKroossState(int num)
+    {
+        GameController.Instance.SetKroossState(num);
+    }
+    public void LoadStage()
     {
         if(canClickButton)
-            StartCoroutine(LoadScene(stageNum));
+            StartCoroutine(LoadScene(GameController.Instance.GetMapNum()));
     }
     IEnumerator LoadScene(int stageNum)
     {
+        // SetKroossState(stageNum - 1);
         mainMenu.SetActive(false);
         title.SetActive(false);
         stageChoise.SetActive(false);
@@ -330,6 +382,7 @@ public class StartScenceController : MonoBehaviour
         AsyncOperation operation = SceneManager.LoadSceneAsync(stageNum);
         operation.allowSceneActivation = false;
         SoundManager.Instance.TurnDownMusic();
+        // SceneManager.MoveGameObjectToScene(player,SceneManager.GetSceneByBuildIndex(newScene));
         while (!operation.isDone)
         {
             loadSlider.value = operation.progress;
@@ -344,8 +397,8 @@ public class StartScenceController : MonoBehaviour
                 if(Input.anyKeyDown)
                 {
                     SoundManager.Instance.StopMusicSound();
-                    operation.allowSceneActivation = true;
                     SoundManager.Instance.TurnUpMusic();
+                    operation.allowSceneActivation = true;
                 }
             }
             yield return null;
@@ -367,6 +420,7 @@ public class StartScenceController : MonoBehaviour
     public void QuitSetting()
     {
         setting.SetActive(false);
+        mainMenu.SetActive(true);
         title.SetActive(true);
         isShowSetting = false;
         UIOrnamentController.SetVisible();

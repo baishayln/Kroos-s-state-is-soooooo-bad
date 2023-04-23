@@ -19,6 +19,7 @@ public class Note : MonoBehaviour
     private float lifeTimer;
     private bool isDown;
     private int moveDir;
+    private float speedMultiplier = 1;
     // Start is called before the first frame update
     void Start()
     {
@@ -53,6 +54,7 @@ public class Note : MonoBehaviour
         {
             speed.y = speedTarget * moveDir;
         }
+        transform.GetComponent<RectTransform>().localScale = Vector3.one;
     }
 
     // Update is called once per frame
@@ -68,10 +70,14 @@ public class Note : MonoBehaviour
                 speedTarget = basicSpeed + Random.Range(0f , speedRandomRadius);
             }
         }
-        
+        if (transform.GetComponent<RectTransform>().localScale.x != 1)
+        {
+            speedMultiplier = Vector3.one.x / transform.GetComponent<RectTransform>().localScale.x;
+            transform.GetComponent<RectTransform>().localScale = Vector3.one;
+        }
         speed.y = Mathf.MoveTowards(speed.y , speedTarget * moveDir , Mathf.Abs(speedTarget * Time.deltaTime));
         
-        rig.velocity = speed;
+        rig.velocity = speed * speedMultiplier;
 
         lifeTimer -= Time.deltaTime;
         if(lifeTimer <= 0)

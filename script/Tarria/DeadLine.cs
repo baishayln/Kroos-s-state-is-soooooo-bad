@@ -18,7 +18,7 @@ public class DeadLine : MonoBehaviour
     {
         if (other.transform.CompareTag("Player"))
         {
-            if(other.transform.GetComponent<PlayerMove>().onHit(5) > 0)
+            if(other.transform.GetComponent<PlayerMove>())
             {
                 if (Vector2.Distance(point1.position , other.transform.position) < Vector2.Distance(point2.position , other.transform.position))
                 {

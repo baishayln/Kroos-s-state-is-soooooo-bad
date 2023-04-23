@@ -1,0 +1,13 @@
+fileFormatVersion: 2
+guid: 57099cfa22158694097309236ff112bf
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - text: {instanceID: 0}
+  - defaltSound: {fileID: 8300000, guid: 6f887ea21b4f8124c9d72122daf7da29, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
